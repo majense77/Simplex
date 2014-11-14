@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
+using System.Diagnostics;
 using RaikesSimplexService.Contracts;
 using RaikesSimplexService.DataModel;
 
@@ -14,7 +15,9 @@ namespace RaikesSimplexService.InsertTeamNameHere
     {
         public Solution Solve(Model model)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            System.Diagnostics.Debug.WriteLine(" ");
+            return null;
         }
     }
 }
