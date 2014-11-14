@@ -8,7 +8,7 @@ using System.Diagnostics;
 using RaikesSimplexService.Contracts;
 using RaikesSimplexService.DataModel;
 
-namespace RaikesSimplexService.InsertTeamNameHere
+namespace RaikesSimplexService.Joel
 {
     
     public class Solver : ISolver
