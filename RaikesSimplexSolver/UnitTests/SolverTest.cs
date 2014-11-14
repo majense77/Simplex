@@ -127,7 +127,7 @@ namespace UnitTests
 
             //Act
             var actual = target.Solve(model);
-
+            
             //Assert
             CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
             Assert.AreEqual(expected.Quality, actual.Quality);

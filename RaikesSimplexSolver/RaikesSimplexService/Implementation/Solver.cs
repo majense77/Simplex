@@ -10,13 +10,12 @@ using RaikesSimplexService.DataModel;
 
 namespace RaikesSimplexService.Joel
 {
-    
+
     public class Solver : ISolver
     {
         public Solution Solve(Model model)
         {
             //throw new NotImplementedException();
-            System.Diagnostics.Debug.WriteLine(" ");
             return null;
         }
     }
