@@ -7,7 +7,6 @@ using System.Text;
 using System.Diagnostics;
 using RaikesSimplexService.Contracts;
 using RaikesSimplexService.DataModel;
-using CSML;
 
 namespace RaikesSimplexService.Joel
 {
