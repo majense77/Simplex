@@ -38,25 +38,49 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.WriteLine("Original Data:");
 
             //Objective Function
-            int counter = 1;
+            int goalCounter = 1;
             System.Diagnostics.Debug.WriteLine("\tObjective Function:");
-            System.Diagnostics.Debug.Write("  " + model.GoalKind + ": Z = ");
+            System.Diagnostics.Debug.Write("\t     " + model.GoalKind + ": Z = ");
             foreach (Double coeff in model.Goal.Coefficients) 
             {
-                System.Diagnostics.Debug.Write(coeff + "x" + counter + " + ");
-                counter++;
+                System.Diagnostics.Debug.Write(coeff + "x" + goalCounter + " + ");
+                goalCounter++;
             }
             System.Diagnostics.Debug.WriteLine(model.Goal.ConstantTerm);
             
             //Linear Constraints
-            counter = 1;
+            int counter;
             System.Diagnostics.Debug.WriteLine("\tConstraints:");
             foreach (LinearConstraint LC in model.Constraints) 
             {
-                System.Diagnostics.Debug.Write(counter + ")");
+                counter = 1;
+                System.Diagnostics.Debug.Write("\t     ");
                 foreach (Double coeff in LC.Coefficients) 
                 {
                     System.Diagnostics.Debug.Write(coeff + "x" + counter);
+                    if (counter != goalCounter - 1)
+                    {
+                        System.Diagnostics.Debug.Write(" + ");
+                    }
+                    else 
+                    {
+                        String relation = "";
+                        if (LC.Relationship == Relationship.Equals) 
+                        {
+                            relation = "=";
+                        }
+                        else if (LC.Relationship == Relationship.GreaterThanOrEquals)
+                        {
+                            relation = ">=";
+                        }
+                        else 
+                        {
+                            relation = "<=";
+                        }
+
+                        System.Diagnostics.Debug.WriteLine(" " + relation + " " + LC.Value);
+                    }
+                    counter++;
                 }
             }
 
