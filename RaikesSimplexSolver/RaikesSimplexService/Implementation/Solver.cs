@@ -94,16 +94,26 @@ namespace RaikesSimplexService.Joel
                     if (constraint.Relationship.Equals(Relationship.LessThanOrEquals)) {
                         newModel.SVariables[i] = 1;
                         newModel.ArtificialVars[i] = 0;
+                        constraint.Relationship = Relationship.Equals;
                     }
                     else if (constraint.Relationship.Equals(Relationship.GreaterThanOrEquals)) {
                         newModel.SVariables[i] = -1;
                         newModel.ArtificialVars[i] = 1;
+                        constraint.Relationship = Relationship.Equals;
                     }
                     else {
                         newModel.SVariables[i] = 0;
                         newModel.ArtificialVars[i] = 0;
                     }
                     i++;
+                }
+                if (newModel.GoalKind.Equals(GoalKind.Minimize))
+                {
+                    for (i = 0; i < newModel.Goal.Coefficients.Length; i++)
+                    {
+                        newModel.Goal.Coefficients[i] = newModel.Goal.Coefficients[i] * -1;
+                    }
+                    newModel.GoalKind = GoalKind.Maximize;
                 }
                 return newModel;
             }
