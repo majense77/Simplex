@@ -85,27 +85,27 @@ namespace RaikesSimplexService.Joel
             }
         }
 
-            private StandardModel StandardizeModel(Model model) {
-                StandardModel newModel = (StandardModel)model;
-                newModel.SVariables = new double[newModel.Constraints.Count];
-                newModel.ArtificialVars = new double[newModel.Constraints.Count];
-                int i = 0;
-                foreach(LinearConstraint constraint in model.Constraints) {
-                    if (constraint.Relationship.Equals(Relationship.LessThanOrEquals)) {
-                        newModel.SVariables[i] = 1;
-                        newModel.ArtificialVars[i] = 0;
-                    }
-                    else if (constraint.Relationship.Equals(Relationship.GreaterThanOrEquals)) {
-                        newModel.SVariables[i] = -1;
-                        newModel.ArtificialVars[i] = 1;
-                    }
-                    else {
-                        newModel.SVariables[i] = 0;
-                        newModel.ArtificialVars[i] = 0;
-                    }
-                    i++;
+        private StandardModel StandardizeModel(Model model) {
+            StandardModel newModel = (StandardModel)model;
+            newModel.SVariables = new double[newModel.Constraints.Count];
+            newModel.ArtificialVars = new double[newModel.Constraints.Count];
+            int i = 0;
+            foreach(LinearConstraint constraint in model.Constraints) {
+                if (constraint.Relationship.Equals(Relationship.LessThanOrEquals)) {
+                    newModel.SVariables[i] = 1;
+                    newModel.ArtificialVars[i] = 0;
                 }
-                return newModel;
+                else if (constraint.Relationship.Equals(Relationship.GreaterThanOrEquals)) {
+                    newModel.SVariables[i] = -1;
+                    newModel.ArtificialVars[i] = 1;
+                }
+                else {
+                    newModel.SVariables[i] = 0;
+                    newModel.ArtificialVars[i] = 0;
+                }
+                i++;
             }
+            return newModel;
+        }
     }
 }
