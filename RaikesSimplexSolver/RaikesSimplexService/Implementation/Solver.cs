@@ -26,13 +26,6 @@ namespace RaikesSimplexService.Joel
             StandardModel standardModel = StandardizeModel(model);
             Matrix m = MakeMatrix(standardModel, model);
             PrintStandardizedModel();
-            foreach (LinearConstraint LC in model.Constraints) 
-            {
-                for (int i = 0; i < LC.Coefficients.Length; i++) 
-                {
-                    //System.Diagnostics.Debug.WriteLine(LC.Coefficients[i]);
-                }
-            }
             return null;
         }
 
@@ -120,5 +113,16 @@ namespace RaikesSimplexService.Joel
             }
             return newModel;
         }
+
+        private Matrix MakeMatrix(StandardModel standardModel, Model model)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void PrintStandardizedModel()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
