@@ -38,16 +38,28 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.WriteLine("Original Data:");
 
             //Objective Function
-            int goalCounter = 1;
-            System.Diagnostics.Debug.WriteLine("Objective Function:");
-            System.Diagnostics.Debug.Write(model.GoalKind + ": Z = ")
+            int counter = 1;
+            System.Diagnostics.Debug.WriteLine("\tObjective Function:");
+            System.Diagnostics.Debug.Write("  " + model.GoalKind + ": Z = ");
             foreach (Double coeff in model.Goal.Coefficients) 
             {
-                System.Diagnostics.Debug.Write(coeff + "x" + goalCounter + " + ");
-                goalCounter++;
+                System.Diagnostics.Debug.Write(coeff + "x" + counter + " + ");
+                counter++;
             }
             System.Diagnostics.Debug.WriteLine(model.Goal.ConstantTerm);
             
+            //Linear Constraints
+            counter = 1;
+            System.Diagnostics.Debug.WriteLine("\tConstraints:");
+            foreach (LinearConstraint LC in model.Constraints) 
+            {
+                System.Diagnostics.Debug.Write(counter + ")");
+                foreach (Double coeff in LC.Coefficients) 
+                {
+                    System.Diagnostics.Debug.Write(coeff + "x" + counter);
+                }
+            }
+
 
         }
     }
