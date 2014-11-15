@@ -83,6 +83,7 @@ namespace RaikesSimplexService.Joel
                     counter++;
                 }
             }
+        }
 
             private StandardModel StandardizeModel(Model model) {
                 StandardModel newModel = (StandardModel)model;
@@ -106,7 +107,5 @@ namespace RaikesSimplexService.Joel
                 }
                 return newModel;
             }
-
-        }
     }
 }
