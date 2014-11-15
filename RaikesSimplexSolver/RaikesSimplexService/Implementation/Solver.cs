@@ -7,6 +7,7 @@ using System.Text;
 using System.Diagnostics;
 using RaikesSimplexService.Contracts;
 using RaikesSimplexService.DataModel;
+using CSML;
 
 namespace RaikesSimplexService.Joel
 {
@@ -23,6 +24,8 @@ namespace RaikesSimplexService.Joel
 
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
+            Matrix m = MakeMatrix(standardModel, model);
+            PrintStandardizedModel();
             foreach (LinearConstraint LC in model.Constraints) 
             {
                 for (int i = 0; i < LC.Coefficients.Length; i++) 
