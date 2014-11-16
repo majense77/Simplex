@@ -154,7 +154,14 @@ namespace RaikesSimplexService.Joel
                     LHSArr[i, j] = standardModel.Constraints[i].Coefficients[j];
                 }
                 for (int j = 0; j < numSVars; j++) {
-                    LHSArr[i, j+numCoefficients] = standardModel.SVariables[j];
+                    if (i == j)
+                    {
+                        LHSArr[i, j + numCoefficients] = standardModel.SVariables[j];
+                    }
+                    else
+                    {
+                        LHSArr[i, j + numCoefficients] = 0;
+                    }
                 }
                 /*for (int j = 0; j < numAVars; j++)
                 {
