@@ -94,22 +94,22 @@ namespace RaikesSimplexService.Joel
             newModel.Goal = model.Goal;
             newModel.GoalKind = model.GoalKind;
             newModel.SVariables = new double[newModel.Constraints.Count];
-            newModel.ArtificialVars = new double[newModel.Constraints.Count];
+            //newModel.ArtificialVars = new double[newModel.Constraints.Count];
             int i = 0;
             foreach(LinearConstraint constraint in model.Constraints) {
                 if (constraint.Relationship.Equals(Relationship.LessThanOrEquals)) {
                     newModel.SVariables[i] = 1;
-                    newModel.ArtificialVars[i] = 0;
+                    //newModel.ArtificialVars[i] = 0;
                     constraint.Relationship = Relationship.Equals;
                 }
                 else if (constraint.Relationship.Equals(Relationship.GreaterThanOrEquals)) {
                     newModel.SVariables[i] = -1;
-                    newModel.ArtificialVars[i] = 1;
+                    //newModel.ArtificialVars[i] = 1;
                     constraint.Relationship = Relationship.Equals;
                 }
                 else {
                     newModel.SVariables[i] = 0;
-                    newModel.ArtificialVars[i] = 0;
+                    //newModel.ArtificialVars[i] = 0;
                 }
                 i++;
             }
@@ -129,8 +129,10 @@ namespace RaikesSimplexService.Joel
             int numConstraints = standardModel.Constraints.Count;
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
             int numSVars = standardModel.SVariables.Length;
-            int numAVars = standardModel.ArtificialVars.Length;
-            double[,] matrix = new double[(numConstraints+1),(numCoefficients+numSVars+numAVars+1)];
+            /*int numAVars = standardModel.ArtificialVars.Length;*/
+            double[,] LHSMatrix = new double[numConstraints,numCoefficients+numSVars/*+numAVars*/];
+            double[,] RHSMatrix = new double[numConstraints, 1];
+            double[,] ObjMatrix = new double[1, numCoefficients + numSVars];
             for (int i = 0; i < numConstraints; i++)
             {
                 for (int j = 0; j < numCoefficients; j++)
@@ -140,21 +142,21 @@ namespace RaikesSimplexService.Joel
                 for (int j = 0; j < numSVars; j++) {
                     matrix[i, j+numCoefficients] = standardModel.SVariables[j];
                 }
-                for (int j = 0; j < numAVars; j++)
+                /*for (int j = 0; j < numAVars; j++)
                 {
                     matrix[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
-                }
-                matrix[i, numCoefficients+numSVars+numAVars] = standardModel.Constraints[i].Value;
+                }*/
+                matrix[i, numCoefficients+numSVars/*+numAVars*/] = standardModel.Constraints[i].Value;
             }
             for (int i = 0; i < numCoefficients; i++)
             {
                 matrix[numConstraints, i] = standardModel.Goal.Coefficients[i];
             }
-            for (int i = 0; i < numSVars + numAVars; i++)
+            for (int i = 0; i < numSVars /*+ numAVars*/; i++)
             {
                 matrix[numConstraints, numCoefficients + i] = 0;
             }
-            matrix[numConstraints, numCoefficients + numSVars + numAVars] = standardModel.Goal.ConstantTerm;
+            matrix[numConstraints, numCoefficients + numSVars /*+ numAVars*/] = standardModel.Goal.ConstantTerm;
             Matrix mat = new Matrix(matrix);
             return mat;
         }
