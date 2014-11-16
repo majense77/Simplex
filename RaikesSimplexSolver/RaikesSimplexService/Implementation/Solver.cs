@@ -23,7 +23,9 @@ namespace RaikesSimplexService.Joel
 
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
-            Matrix m = MakeMatrix(standardModel);
+            Matrix RHSMatrix = MakeRHSMatrix(standardModel);
+            Matrix LHSMatrix = MakeLHSMatrix(standardModel);
+            Matrix ObjMatrix = MakeObjMatrix(standardModel);
             PrintStandardizedModel(m, standardModel);
             return null;
         }
@@ -124,41 +126,63 @@ namespace RaikesSimplexService.Joel
             return newModel;
         }
 
-        private Matrix MakeMatrix(StandardModel standardModel)
+        private Matrix MakeRHSMatrix(StandardModel standardModel)
         {
             int numConstraints = standardModel.Constraints.Count;
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
             int numSVars = standardModel.SVariables.Length;
+            double[,] RHSArr = new double[numConstraints, 1];
             /*int numAVars = standardModel.ArtificialVars.Length;*/
-            double[,] LHSMatrix = new double[numConstraints,numCoefficients+numSVars/*+numAVars*/];
-            double[,] RHSMatrix = new double[numConstraints, 1];
-            double[,] ObjMatrix = new double[1, numCoefficients + numSVars];
+            for (int i = 0; i < numConstraints; i++)
+            {
+                RHSArr[i, 0] = standardModel.Constraints[i].Value;
+            }
+            Matrix RHSMatrix = new Matrix(RHSArr);
+            return RHSMatrix;
+        }
+
+        private Matrix MakeLHSMatrix(StandardModel standardModel) {
+            int numConstraints = standardModel.Constraints.Count;
+            int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
+            int numSVars = standardModel.SVariables.Length;
+            /*int numAVars = standardModel.ArtificialVars.Length;*/
+            double[,] LHSArr = new double[numConstraints,numCoefficients+numSVars/*+numAVars*/];
             for (int i = 0; i < numConstraints; i++)
             {
                 for (int j = 0; j < numCoefficients; j++)
                 {
-                    matrix[i, j] = standardModel.Constraints[i].Coefficients[j];
+                    LHSArr[i, j] = standardModel.Constraints[i].Coefficients[j];
                 }
                 for (int j = 0; j < numSVars; j++) {
-                    matrix[i, j+numCoefficients] = standardModel.SVariables[j];
+                    LHSArr[i, j+numCoefficients] = standardModel.SVariables[j];
                 }
                 /*for (int j = 0; j < numAVars; j++)
                 {
                     matrix[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
                 }*/
-                matrix[i, numCoefficients+numSVars/*+numAVars*/] = standardModel.Constraints[i].Value;
             }
+            Matrix LHSMatrix = new Matrix(LHSArr);
+            return LHSMatrix;
+        }
+
+        private Matrix MakeObjMatrix(StandardModel standardModel)
+        {
+            int numConstraints = standardModel.Constraints.Count;
+            int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
+            int numSVars = standardModel.SVariables.Length;
+            /*int numAVars = standardModel.ArtificialVars.Length;*/
+            double[,] ObjArr = new double[1, numCoefficients + numSVars];
             for (int i = 0; i < numCoefficients; i++)
             {
-                matrix[numConstraints, i] = standardModel.Goal.Coefficients[i];
+                ObjArr[0, i] = standardModel.Goal.Coefficients[i];
             }
             for (int i = 0; i < numSVars /*+ numAVars*/; i++)
             {
-                matrix[numConstraints, numCoefficients + i] = 0;
+                ObjArr[0, numCoefficients + i] = 0;
             }
-            matrix[numConstraints, numCoefficients + numSVars /*+ numAVars*/] = standardModel.Goal.ConstantTerm;
-            Matrix mat = new Matrix(matrix);
-            return mat;
+            //matrix[numConstraints, numCoefficients + numSVars /*+ numAVars*/] = standardModel.Goal.ConstantTerm;
+            Matrix ObjMatrix = new Matrix(ObjArr);
+            return ObjMatrix;
         }
 
         private void PrintStandardizedModel(Matrix m, StandardModel standardModel)
