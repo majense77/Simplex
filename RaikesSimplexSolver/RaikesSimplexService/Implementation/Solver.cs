@@ -15,12 +15,6 @@ namespace RaikesSimplexService.Joel
     {
         public Solution Solve(Model model)
         {
-            //throw new NotImplementedException();
-
-            //Print the original obj function and constraints
-            //Then compute slack, surplus and artificial vars
-            //Print out standard form of matrix (think LPSolve)
-
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
             Matrix RHSMatrix = MakeRHSMatrix(standardModel);
@@ -201,7 +195,6 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.Write("\t  [\t" + RHS.ToString());
             System.Diagnostics.Debug.WriteLine("\n\tObjective Row:");
             System.Diagnostics.Debug.Write("\t  [\t" + Z.ToString());
-
         }
 
     }
