@@ -116,7 +116,14 @@ namespace RaikesSimplexService.Joel
         private Matrix MakeMatrix(StandardModel standardModel)
         {
             //throw new NotImplementedException();
-            double[,] matrix = new double[standardModel,]
+            double[,] matrix = new double[(standardModel.Constraints.Count+1),(standardModel.Constraints[0].Coefficients.Length+3)];
+            for (int i = 0; i < standardModel.Constraints.Count; i++)
+            {
+                for (int j = 0; j < standardModel.Constraints[0].Coefficients.Length; j++)
+                {
+
+                }
+            }
         }
 
         private void PrintStandardizedModel()
