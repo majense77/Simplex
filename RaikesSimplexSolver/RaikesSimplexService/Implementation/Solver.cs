@@ -89,7 +89,10 @@ namespace RaikesSimplexService.Joel
         }
 
         private StandardModel StandardizeModel(Model model) {
-            StandardModel newModel = (StandardModel)model;
+            StandardModel newModel = new StandardModel();
+            newModel.Constraints = model.Constraints;
+            newModel.Goal = model.Goal;
+            newModel.GoalKind = model.GoalKind;
             newModel.SVariables = new double[newModel.Constraints.Count];
             newModel.ArtificialVars = new double[newModel.Constraints.Count];
             int i = 0;
