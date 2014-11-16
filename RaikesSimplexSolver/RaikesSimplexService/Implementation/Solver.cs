@@ -24,7 +24,7 @@ namespace RaikesSimplexService.Joel
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
             Matrix m = MakeMatrix(standardModel);
-            PrintStandardizedModel();
+            PrintStandardizedModel(m, standardModel);
             return null;
         }
 
@@ -126,9 +126,9 @@ namespace RaikesSimplexService.Joel
             }
         }
 
-        private void PrintStandardizedModel()
+        private void PrintStandardizedModel(Matrix m, StandardModel standardModel)
         {
-            throw new NotImplementedException();
+            
         }
 
     }
