@@ -36,16 +36,24 @@ namespace RaikesSimplexService.Joel
             int goalCounter = 1;
             System.Diagnostics.Debug.WriteLine("\tObjective Function:");
             System.Diagnostics.Debug.Write("\t     " + model.GoalKind + ": Z = ");
-            foreach (Double coeff in model.Goal.Coefficients) 
+            for (int i = 0; i < model.Goal.Coefficients.Length; i++) 
             {
-                System.Diagnostics.Debug.Write(coeff + "x" + goalCounter + " + ");
+                System.Diagnostics.Debug.Write(model.Goal.Coefficients[i] + "x" + (i+1));
+                if (model.Goal.ConstantTerm == 0 && (i + 1 == model.Goal.Coefficients.Length)) 
+                { }
+                else if ((i+1) != model.Goal.Coefficients.Length + 1) 
+                {
+                    System.Diagnostics.Debug.Write(" + ");
+                }
                 goalCounter++;
             }
-            System.Diagnostics.Debug.WriteLine(model.Goal.ConstantTerm);
+      
+            if (model.Goal.ConstantTerm != 0)
+                System.Diagnostics.Debug.WriteLine(model.Goal.ConstantTerm); 
             
             //Linear Constraints
             int counter;
-            System.Diagnostics.Debug.WriteLine("\tConstraints:");
+            System.Diagnostics.Debug.WriteLine("\n\tConstraints:");
             foreach (LinearConstraint LC in model.Constraints) 
             {
                 counter = 1;
@@ -116,7 +124,7 @@ namespace RaikesSimplexService.Joel
         private Matrix MakeMatrix(StandardModel standardModel)
         {
             //throw new NotImplementedException();
-            double[,] matrix = new double[(standardModel.Constraints.Count+1),(standardModel.Constraints[0].Coefficients.Length+3)];
+            double[,] matrix = new double[(standardModel.Constraints.Count + 1), (standardModel.Constraints[0].Coefficients.Length + 3)];
             for (int i = 0; i < standardModel.Constraints.Count; i++)
             {
                 for (int j = 0; j < standardModel.Constraints[0].Coefficients.Length; j++)
