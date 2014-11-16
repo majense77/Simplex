@@ -116,14 +116,37 @@ namespace RaikesSimplexService.Joel
         private Matrix MakeMatrix(StandardModel standardModel)
         {
             //throw new NotImplementedException();
-            double[,] matrix = new double[(standardModel.Constraints.Count+1),(standardModel.Constraints[0].Coefficients.Length+3)];
-            for (int i = 0; i < standardModel.Constraints.Count; i++)
+            int numConstraints = standardModel.Constraints.Count;
+            int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
+            int numSVars = standardModel.SVariables.Length;
+            int numAVars = standardModel.ArtificialVars.Length;
+            double[,] matrix = new double[(numConstraints+1),(numCoefficients+numSVars+numAVars+1)];
+            for (int i = 0; i < numConstraints; i++)
             {
-                for (int j = 0; j < standardModel.Constraints[0].Coefficients.Length; j++)
+                for (int j = 0; j < numCoefficients; j++)
                 {
-
+                    matrix[i, j] = standardModel.Constraints[i].Coefficients[j];
                 }
+                for (int j = 0; j < numSVars; j++) {
+                    matrix[i, j+numCoefficients] = standardModel.SVariables[j];
+                }
+                for (int j = 0; j < numAVars; j++)
+                {
+                    matrix[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
+                }
+                matrix[i, numCoefficients+numSVars+numAVars] = standardModel.Constraints[i].Value;
             }
+            for (int i = 0; i < numCoefficients; i++)
+            {
+                matrix[numConstraints, i] = standardModel.Goal.Coefficients[i];
+            }
+            for (int i = 0; i < numSVars + numAVars; i++)
+            {
+                matrix[numConstraints, numCoefficients + i] = 0;
+            }
+            matrix[numConstraints, numCoefficients + numSVars + numAVars] = standardModel.Goal.ConstantTerm;
+            Matrix mat = new Matrix(matrix);
+            return mat;
         }
 
         private void PrintStandardizedModel()
