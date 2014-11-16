@@ -3200,10 +3200,13 @@ namespace RaikesSimplexService.DataModel
                     else
                         s += buf.ToString();
 
-                    s += ";" + "\t";
+                    s += "\t";
                 }
 
-                s += "\\" + System.Environment.NewLine;
+                if (i != rowCount)
+                    s += "]" + System.Environment.NewLine + "\t  [\t";
+                else
+                    s += "]" + System.Environment.NewLine;
             }
 
             return s;
@@ -3227,10 +3230,10 @@ namespace RaikesSimplexService.DataModel
                     else
                         s += buf.ToString(format);
 
-                    s += ";" + "\t";
+                    s += "\t";
                 }
 
-                s += "\\" + System.Environment.NewLine;
+                s += "]" + System.Environment.NewLine;
             }
 
             return s;
