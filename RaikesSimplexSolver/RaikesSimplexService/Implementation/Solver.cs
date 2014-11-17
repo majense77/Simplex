@@ -75,11 +75,18 @@ namespace RaikesSimplexService.Joel
             return RHSMatrix;
         }
 
+        //private bool isNotZero(double n)
+        //{
+        //    return n != 0;
+        //}
+
+
         private Matrix MakeLHSMatrix(StandardModel standardModel) {
             int numConstraints = standardModel.Constraints.Count;
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
             int numSVars = standardModel.SVariables.Length;
             int numAVars = standardModel.ArtificialVars.Length;
+            //int numAVars = Array.FindAll(standardModel.ArtificialVars, isNotZero).ToArray().Length;
             double[,] LHSArr = new double[numConstraints,numCoefficients + numSVars + numAVars];
             for (int i = 0; i < numConstraints; i++)
             {
@@ -97,10 +104,17 @@ namespace RaikesSimplexService.Joel
                         LHSArr[i, j + numCoefficients] = 0;
                     }
                 }
-                //for (int j = 0; j < numAVars; j++)
-                //{
-                //    LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
-                //}
+                for (int j = 0; j < numAVars; j++)
+                {
+                    if (i == j)
+                    {
+                        LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
+                    }
+                    else
+                    {
+                        LHSArr[i, j + numCoefficients + numSVars] = 0;
+                    }
+                }
             }
             Matrix LHSMatrix = new Matrix(LHSArr);
             return LHSMatrix;

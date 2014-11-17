@@ -77,6 +77,7 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 8, 12 },
                 Relationship = Relationship.GreaterThanOrEquals,
+                //Relationship = Relationship.LessThanOrEquals,
                 Value = 24
             };
 
@@ -84,6 +85,7 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 12, 12 },
                 Relationship = Relationship.GreaterThanOrEquals,
+                //Relationship = Relationship.LessThanOrEquals,
                 Value = 36
             };
 
@@ -91,6 +93,7 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 2, 1 },
                 Relationship = Relationship.GreaterThanOrEquals,
+                //Relationship = Relationship.LessThanOrEquals,
                 Value = 4
             };
 
@@ -98,6 +101,7 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 1, 1 },
                 Relationship = Relationship.LessThanOrEquals,
+                //Relationship = Relationship.Equals,
                 Value = 5
             };
 
