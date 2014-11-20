@@ -18,9 +18,9 @@ namespace RaikesSimplexService.Joel
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
             Matrix RHSMatrix = MakeRHSMatrix(standardModel);
-            Matrix LHSMatrix = MakeLHSMatrix(standardModel);
+            Matrix XbMatrix = MakeLHSMatrix(standardModel);
             Matrix ObjMatrix = MakeZObjMatrix(standardModel);
-            PrintStandardizedModel(RHSMatrix,LHSMatrix,ObjMatrix);
+            PrintStandardizedModel(RHSMatrix,XbMatrix,ObjMatrix);
             return null;
         }
 
@@ -185,13 +185,13 @@ namespace RaikesSimplexService.Joel
             }
         }
 
-        private void PrintStandardizedModel(Matrix RHS, Matrix LHS, Matrix Z)
+        private void PrintStandardizedModel(Matrix Xb, Matrix LHS, Matrix Z)
         {
             System.Diagnostics.Debug.Write("\nStandard Matrx Form: ");
             System.Diagnostics.Debug.WriteLine("\n\tLHS:");
             System.Diagnostics.Debug.Write("\t  [\t" + LHS.ToString());
-            System.Diagnostics.Debug.WriteLine("\n\tRHS:");
-            System.Diagnostics.Debug.Write("\t  [\t" + RHS.ToString());
+            System.Diagnostics.Debug.WriteLine("\n\tXb:");
+            System.Diagnostics.Debug.Write("\t  [\t" + Xb.ToString());
             System.Diagnostics.Debug.WriteLine("\n\tObjective Row:");
             System.Diagnostics.Debug.Write("\t  [\t" + Z.ToString());
         }
