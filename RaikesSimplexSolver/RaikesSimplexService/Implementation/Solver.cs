@@ -19,7 +19,7 @@ namespace RaikesSimplexService.Joel
             StandardModel standardModel = StandardizeModel(model);
             Matrix RHSMatrix = MakeRHSMatrix(standardModel);
             Matrix LHSMatrix = MakeLHSMatrix(standardModel);
-            Matrix ObjMatrix = MakeObjMatrix(standardModel);
+            Matrix ObjMatrix = MakeZObjMatrix(standardModel);
             PrintStandardizedModel(RHSMatrix,LHSMatrix,ObjMatrix);
             return null;
         }
@@ -120,7 +120,7 @@ namespace RaikesSimplexService.Joel
             return LHSMatrix;
         }
 
-        private Matrix MakeObjMatrix(StandardModel standardModel)
+        private Matrix MakeZObjMatrix(StandardModel standardModel)
         {
             int numConstraints = standardModel.Constraints.Count;
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
@@ -135,7 +135,6 @@ namespace RaikesSimplexService.Joel
             {
                 ObjArr[0, numCoefficients + i] = 0;
             }
-            //matrix[numConstraints, numCoefficients + numSVars /*+ numAVars*/] = standardModel.Goal.ConstantTerm;
             Matrix ObjMatrix = new Matrix(ObjArr);
             return ObjMatrix;
         }
