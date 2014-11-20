@@ -8,8 +8,8 @@ namespace RaikesSimplexService.DataModel
     class StandardModel : Model
     {
 
-        public Dictionary<int, double>[] SVariables { get; set; }
+        public Dictionary<int, double> SVariables { get; set; }
 
-        public Dictionary<int, double>[] ArtificialVars { get; set; }
+        public Dictionary<int, double> ArtificialVars { get; set; }
     }
 }
