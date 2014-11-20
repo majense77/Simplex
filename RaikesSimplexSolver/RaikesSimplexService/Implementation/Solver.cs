@@ -95,24 +95,26 @@ namespace RaikesSimplexService.Joel
                     LHSArr[i, j] = standardModel.Constraints[i].Coefficients[j];
                 }
                 for (int j = 0; j < numSVars; j++) {
-                    if (i == j)
+                    if (standardModel.SVariables.ContainsKey(j))
                     {
-                        LHSArr[i, j + numCoefficients] = standardModel.SVariables[j];
+                        if (i == j)
+                            LHSArr[i, j + numCoefficients] = standardModel.SVariables[j];
+                        else
+                            LHSArr[i, j + numCoefficients] = 0;
                     }
-                    else
-                    {
-                        LHSArr[i, j + numCoefficients] = 0;
-                    }
+                    //else
+                    //{
+                    //    LHSArr[i, j + numCoefficients] = 0;
+                    //}
                 }
                 for (int j = 0; j < numAVars; j++)
                 {
-                    if (i == j)
+                    if (standardModel.ArtificialVars.ContainsKey(j)) 
                     {
-                        LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
-                    }
-                    else
-                    {
-                        LHSArr[i, j + numCoefficients + numSVars] = 0;
+                        if (i == j)
+                            LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
+                        else
+                            LHSArr[i, j + numCoefficients + numSVars] = 0;
                     }
                 }
             }
