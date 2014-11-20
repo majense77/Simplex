@@ -102,10 +102,6 @@ namespace RaikesSimplexService.Joel
                         else
                             LHSArr[i, j + numCoefficients] = 0;
                     }
-                    //else
-                    //{
-                    //    LHSArr[i, j + numCoefficients] = 0;
-                    //}
                 }
                 for (int j = 0; j < numAVars; j++)
                 {
@@ -128,12 +124,12 @@ namespace RaikesSimplexService.Joel
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
             int numSVars = standardModel.SVariables.ToArray().Length;
             int numAVars = standardModel.ArtificialVars.ToArray().Length;
-            double[,] ObjArr = new double[1, numCoefficients + numSVars];
+            double[,] ObjArr = new double[1, numCoefficients + numSVars + numAVars];
             for (int i = 0; i < numCoefficients; i++)
             {
                 ObjArr[0, i] = standardModel.Goal.Coefficients[i];
             }
-            for (int i = 0; i < numSVars /*+ numAVars*/; i++)
+            for (int i = 0; i < numSVars + numAVars; i++)
             {
                 ObjArr[0, numCoefficients + i] = 0;
             }
