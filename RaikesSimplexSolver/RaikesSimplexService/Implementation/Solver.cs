@@ -179,7 +179,7 @@ namespace RaikesSimplexService.Joel
                     {
                         if (basic[i] < numCoefficients)
                         {
-                            decisions[basic[i]] = Double.Parse(XbPrime.RowSum(basic[i] + 1).ToString());
+                            decisions[basic[i]] = Double.Parse(XbPrime.RowSum(i + 1).ToString());
                         }
                     }
                     solution.Decisions = decisions;
