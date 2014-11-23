@@ -140,7 +140,11 @@ namespace RaikesSimplexService.Joel
             int numAVars = model.ArtificialVars.Count;
             int length = numCoefficients+numSVars+numAVars;
             double[] CnPrimes = new double[length];
+<<<<<<< HEAD
             
+=======
+            List<Matrix> PnPrimes = new List<Matrix>();
+>>>>>>> origin/master
             while (!optimized)
             {
                 Matrix basicMatrix = createBasicMatrix(basic, LHSMatrix);
@@ -152,6 +156,7 @@ namespace RaikesSimplexService.Joel
                     {
                         Matrix Pn = LHSMatrix.Column(i + 1);
                         Matrix PnPrime = inverse * Pn;
+                        PnPrimes.Add(PnPrime);
                         double Cn = Double.Parse(ObjMatrix.ColumnSum(i).ToString());
                         double herp = Double.Parse((Cb * PnPrime).ColumnSum(1).ToString());
                         double CnPrime = Cn - herp;
