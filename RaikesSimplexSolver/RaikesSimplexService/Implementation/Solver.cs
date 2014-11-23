@@ -174,9 +174,11 @@ namespace RaikesSimplexService.Joel
                 }
 
                 double[] ratios = new double[model.Constraints.Count];
-                for(int i = 0; i < model.Constraints.Count) 
+                for (int i = 0; i < model.Constraints.Count; i++ )
                 {
-                    //to do
+                    double xbValue = Double.Parse(XbPrime.Row(i + 1).ToString());
+                    double pnValue = Double.Parse(PnPrimes[i].Row(i + 1).ToString());
+                    ratios[i] = xbValue / pnValue;
                 }
 
                 int exiting;
