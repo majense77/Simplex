@@ -185,5 +185,62 @@ namespace UnitTests
             Assert.AreEqual(expected.Quality, actual.Quality);
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
         }
+
+
+        /// <summary>
+        ///A test for Solve
+        ///</summary>
+        [TestMethod()]
+        public void ExampleSolveTest2()
+        {
+            #region Test3
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 4 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 24
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 2 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 16
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 3 , 9 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Minimize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 8 , 4 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 60
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+            
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
     }
 }

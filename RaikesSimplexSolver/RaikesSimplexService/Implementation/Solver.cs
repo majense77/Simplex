@@ -22,8 +22,8 @@ namespace RaikesSimplexService.Joel
             Matrix LHSMatrix = mm.MakeLHSMatrix(standardModel);
             Matrix ObjMatrix = mm.MakeZObjMatrix(standardModel);
             PrintStandardizedModel(XbMatrix,LHSMatrix,ObjMatrix);
-            SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
-            return null;
+            Solution solution = SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
+            return solution;
         }
 
         private StandardModel StandardizeModel(Model model) {
@@ -186,7 +186,7 @@ namespace RaikesSimplexService.Joel
                     double optimalVal = 0;
                     for (int i = 0; i < numCoefficients; i++ ) 
                     {
-                        optimalVal += decisions[i] * model.Goal.Coefficients[i];
+                        optimalVal += decisions[i] * model.Goal.Coefficients[i] * -1;
                     }
                     solution.OptimalValue = optimalVal;
                     solution.AlternateSolutionsExist = false;
