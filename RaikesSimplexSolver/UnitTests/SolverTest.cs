@@ -71,47 +71,95 @@ namespace UnitTests
         public void ExampleSolveTest()
         {
             #region Arrange
-            var target = new Solver();            
+            //var target = new Solver();            
+
+            //var lc1 = new LinearConstraint()
+            //{
+            //    Coefficients = new double[2] { 8, 12 },
+            //    Relationship = Relationship.GreaterThanOrEquals,
+            //    //Relationship = Relationship.LessThanOrEquals,
+            //    Value = 24
+            //};
+
+            //var lc2 = new LinearConstraint()
+            //{
+            //    Coefficients = new double[2] { 12, 12 },
+            //    Relationship = Relationship.GreaterThanOrEquals,
+            //    //Relationship = Relationship.LessThanOrEquals,
+            //    Value = 36
+            //};
+
+            //var lc3 = new LinearConstraint()
+            //{
+            //    Coefficients = new double[2] { 2, 1 },
+            //    Relationship = Relationship.GreaterThanOrEquals,
+            //    //Relationship = Relationship.LessThanOrEquals,
+            //    Value = 4
+            //};
+
+            //var lc4 = new LinearConstraint()
+            //{
+            //    Coefficients = new double[2] { 1, 1 },
+            //    Relationship = Relationship.LessThanOrEquals,
+            //    //Relationship = Relationship.Equals,
+            //    Value = 5
+            //};
+
+            //var constraints = new List<LinearConstraint>() {lc1, lc2, lc3, lc4};
+
+            //var goal = new Goal() 
+            //{ 
+            //    Coefficients = new double[2] { 0.2, 0.3 },
+            //    ConstantTerm = 0
+            //};           
+
+            //var model = new Model()
+            //{
+            //    Constraints = constraints,
+            //    Goal = goal,
+            //    GoalKind = GoalKind.Minimize
+            //};
+            
+            //var expected = new Solution()
+            //{
+            //    Decisions = new double[2] { 3, 0 },
+            //    Quality = SolutionQuality.Optimal,
+            //    AlternateSolutionsExist = false,
+            //    OptimalValue = 0.6
+            //};
+            #endregion
+
+            #region Test2
+            var target = new Solver();
 
             var lc1 = new LinearConstraint()
             {
-                Coefficients = new double[2] { 8, 12 },
-                Relationship = Relationship.GreaterThanOrEquals,
-                //Relationship = Relationship.LessThanOrEquals,
-                Value = 24
+                Coefficients = new double[2] { 2, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 32
             };
 
             var lc2 = new LinearConstraint()
             {
-                Coefficients = new double[2] { 12, 12 },
-                Relationship = Relationship.GreaterThanOrEquals,
-                //Relationship = Relationship.LessThanOrEquals,
-                Value = 36
+                Coefficients = new double[2] { 1, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 18
             };
 
             var lc3 = new LinearConstraint()
             {
-                Coefficients = new double[2] { 2, 1 },
-                Relationship = Relationship.GreaterThanOrEquals,
-                //Relationship = Relationship.LessThanOrEquals,
-                Value = 4
-            };
-
-            var lc4 = new LinearConstraint()
-            {
-                Coefficients = new double[2] { 1, 1 },
+                Coefficients = new double[2] { 1, 3 },
                 Relationship = Relationship.LessThanOrEquals,
-                //Relationship = Relationship.Equals,
-                Value = 5
+                Value = 36
             };
 
-            var constraints = new List<LinearConstraint>() {lc1, lc2, lc3, lc4};
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3 };
 
-            var goal = new Goal() 
-            { 
-                Coefficients = new double[2] { 0.2, 0.3 },
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 80, 70 },
                 ConstantTerm = 0
-            };           
+            };
 
             var model = new Model()
             {
@@ -119,13 +167,13 @@ namespace UnitTests
                 Goal = goal,
                 GoalKind = GoalKind.Minimize
             };
-            
+
             var expected = new Solution()
             {
-                Decisions = new double[2] { 3, 0 },
+                Decisions = new double[2] { 14, 4 },
                 Quality = SolutionQuality.Optimal,
                 AlternateSolutionsExist = false,
-                OptimalValue = 0.6
+                OptimalValue = 1400
             };
             #endregion
 

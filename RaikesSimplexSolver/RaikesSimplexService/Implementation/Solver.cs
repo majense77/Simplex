@@ -153,10 +153,14 @@ namespace RaikesSimplexService.Joel
                         Matrix Pn = LHSMatrix.Column(i + 1);
                         Matrix PnPrime = inverse * Pn;
                         PnPrimes.Add(PnPrime);
-                        double Cn = Double.Parse(ObjMatrix.ColumnSum(i).ToString());
+                        double Cn = Double.Parse(ObjMatrix.ColumnSum(i + 1).ToString());
                         double herp = Double.Parse((Cb * PnPrime).ColumnSum(1).ToString());
                         double CnPrime = Cn - herp;
                         CnPrimes[i] = CnPrime;
+                    }
+                    else 
+                    {
+                        CnPrimes[i] = 0;
                     }
                 }
 
@@ -176,8 +180,8 @@ namespace RaikesSimplexService.Joel
                 double[] ratios = new double[model.Constraints.Count];
                 for (int i = 0; i < model.Constraints.Count; i++ )
                 {
-                    double xbValue = Double.Parse(XbPrime.Row(i + 1).ToString());
-                    double pnValue = Double.Parse(PnPrimes[i].Row(i + 1).ToString());
+                    double xbValue = Double.Parse(XbPrime.RowSum(i + 1).ToString());
+                    double pnValue = Double.Parse(PnPrimes[entering].RowSum(i + 1).ToString());
                     ratios[i] = xbValue / pnValue;
                 }
 
@@ -192,8 +196,8 @@ namespace RaikesSimplexService.Joel
                     }
                 }
 
-                int exitingIndex = Array.IndexOf(basic, exitingColumn);
-                basic[exitingIndex] = entering;
+                //int exitingIndex = Array.IndexOf(basic, exitingColumn);
+                basic[exitingColumn] = entering;
             }
 
         }
