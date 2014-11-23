@@ -140,6 +140,7 @@ namespace RaikesSimplexService.Joel
             int numAVars = model.ArtificialVars.Count;
             int length = numCoefficients+numSVars+numAVars;
             double[] CnPrimes = new double[length];
+            
             while (!optimized)
             {
                 Matrix basicMatrix = createBasicMatrix(basic, LHSMatrix);
@@ -156,12 +157,29 @@ namespace RaikesSimplexService.Joel
                         double CnPrime = Cn - herp;
                         CnPrimes[i] = CnPrime;
                     }
-                    if (CnPrimes.Min() < 0)
-                    {
-                        int index = Array.IndexOf(CnPrimes, CnPrimes.Min());
-                    }
                 }
+
+                Matrix XbPrime = inverse * XbMatrix;
+
+                if (CnPrimes.Min() < 0)
+                {
+                    int entering = Array.IndexOf(CnPrimes, CnPrimes.Min());
+                }
+                else 
+                {
+                    optimized = true;
+                    //assign optimized solution
+                    break;
+                }
+
+                double[] ratios = new double[model.Constraints.Count];
+                for(int i = 0; i < model.Constraints.Count) 
+                {
+                    //to do
+                }
+
             }
+
         }
 
         private int[] findFirstBasic(StandardModel model)
