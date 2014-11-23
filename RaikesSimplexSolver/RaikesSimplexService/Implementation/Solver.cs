@@ -156,5 +156,10 @@ namespace RaikesSimplexService.Joel
             return basic;
         }
 
+        private Matrix Invert(Matrix matrix)
+        {
+            return matrix.Inverse();
+        }
     }
+
 }
