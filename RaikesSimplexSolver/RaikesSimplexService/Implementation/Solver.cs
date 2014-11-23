@@ -158,16 +158,32 @@ namespace RaikesSimplexService.Joel
                         double CnPrime = Cn - herp;
                         CnPrimes[i] = CnPrime;
                     }
-                    if (CnPrimes.Min() < 0)
-                    {
-                        int entering = Array.IndexOf(CnPrimes, CnPrimes.Min());
-                    }
-
                 }
+
+                Matrix XbPrime = inverse * XbMatrix;
+                int entering = 0;
+                if (CnPrimes.Min() < 0)
+                {
+                    entering = Array.IndexOf(CnPrimes, CnPrimes.Min());
+                }
+                else 
+                {
+                    optimized = true;
+                    //assign optimized solution
+                    break;
+                }
+
+                double[] ratios = new double[model.Constraints.Count];
+                for(int i = 0; i < model.Constraints.Count) 
+                {
+                    //to do
+                }
+
                 int exiting;
                 int exitingIndex = Array.IndexOf(basic, exiting);
                 basic[exitingIndex] = entering;
             }
+
         }
 
         private int[] findFirstBasic(StandardModel model)
