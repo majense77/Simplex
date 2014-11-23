@@ -181,8 +181,18 @@ namespace RaikesSimplexService.Joel
                     ratios[i] = xbValue / pnValue;
                 }
 
-                int exiting;
-                int exitingIndex = Array.IndexOf(basic, exiting);
+               double min = ratios[0];
+               int exitingColumn = 0;  //Change for unbounded stuff, eventually
+                for (int i = 0; i < ratios.Length; i++)
+                {
+                    if (ratios[i] < min && ratios[i] > 0)
+                    {
+                        min = ratios[i];
+                        exitingColumn = i;
+                    }
+                }
+
+                int exitingIndex = Array.IndexOf(basic, exitingColumn);
                 basic[exitingIndex] = entering;
             }
 
