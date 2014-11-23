@@ -131,8 +131,37 @@ namespace RaikesSimplexService.Joel
         private void SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
         {
             int[] basic = findFirstBasic(model);
-            //for loop
-            Matrix basicMatrix = createBasicMatrix(basic, LHSMatrix);
+            Boolean optimized = false;
+            if (model.Goal.Coefficients.Min() > 0) {
+                optimized = true;
+            }
+            int numCoefficients = model.Constraints[0].Coefficients.Length;
+            int numSVars = model.SVariables.Count;
+            int numAVars = model.ArtificialVars.Count;
+            int length = numCoefficients+numSVars+numAVars;
+            double[] CnPrimes = new double[length];
+            while (!optimized)
+            {
+                Matrix basicMatrix = createBasicMatrix(basic, LHSMatrix);
+                Matrix Cb = createCbMatrix(basic, ObjMatrix);
+                Matrix inverse = Invert(basicMatrix);
+                for (int i = 0; i < length; i++)
+                {
+                    if (!basic.Contains(i))
+                    {
+                        Matrix Pn = LHSMatrix.Column(i + 1);
+                        Matrix PnPrime = inverse * Pn;
+                        double Cn = Double.Parse(ObjMatrix.ColumnSum(i).ToString());
+                        double herp = Double.Parse((Cb * PnPrime).ColumnSum(1).ToString());
+                        double CnPrime = Cn - herp;
+                        CnPrimes[i] = CnPrime;
+                    }
+                    if (CnPrimes.Min() < 0)
+                    {
+                        int index = Array.IndexOf(CnPrimes, CnPrimes.Min());
+                    }
+                }
+            }
         }
 
         private int[] findFirstBasic(StandardModel model)
@@ -168,6 +197,17 @@ namespace RaikesSimplexService.Joel
             }
             //System.Diagnostics.Debug.Write(basicMatrix.ToString());
             return basicMatrix;
+        }
+
+        private Matrix createCbMatrix(int[] basic, Matrix ObjMatrix)
+        {
+            Matrix CbMatrix = new Matrix();
+            for (int i = 0; i < basic.Length; i++)
+            {
+                Matrix temp = ObjMatrix.Column(basic[i] + 1);
+                CbMatrix.InsertColumn(temp, i + 1);
+            }
+            return CbMatrix;
         }
 
         private Matrix Invert(Matrix matrix)
