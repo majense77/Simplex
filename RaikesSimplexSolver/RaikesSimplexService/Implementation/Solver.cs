@@ -128,7 +128,7 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.Write("\t  [\t" + Z.ToString());
         }
 
-        private void SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
+        private Solution SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
         {
             int[] basic = findFirstBasic(model);
             Boolean optimized = false;
@@ -173,8 +173,25 @@ namespace RaikesSimplexService.Joel
                 else 
                 {
                     optimized = true;
-                    //assign optimized solution
-                    break;
+                    Solution solution = new Solution();
+                    double[] decisions = new double[numCoefficients];
+                    for (int i = 0; i < basic.Length; i++)
+                    {
+                        if (basic[i] < numCoefficients)
+                        {
+                            decisions[basic[i]] = Double.Parse(XbPrime.RowSum(basic[i] + 1).ToString());
+                        }
+                    }
+                    solution.Decisions = decisions;
+                    double optimalVal = 0;
+                    for (int i = 0; i < numCoefficients; i++ ) 
+                    {
+                        optimalVal += decisions[i] * model.Goal.Coefficients[i];
+                    }
+                    solution.OptimalValue = optimalVal;
+                    solution.AlternateSolutionsExist = false;
+                    solution.Quality = SolutionQuality.Optimal;
+                    return solution;
                 }
 
                 double[] ratios = new double[model.Constraints.Count];
@@ -199,7 +216,7 @@ namespace RaikesSimplexService.Joel
                 //int exitingIndex = Array.IndexOf(basic, exitingColumn);
                 basic[exitingColumn] = entering;
             }
-
+            return null;
         }
 
         private int[] findFirstBasic(StandardModel model)
