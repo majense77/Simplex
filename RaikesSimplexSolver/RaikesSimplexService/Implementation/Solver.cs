@@ -22,7 +22,7 @@ namespace RaikesSimplexService.Joel
             Matrix XbMatrix = mm.MakeLHSMatrix(standardModel);
             Matrix ObjMatrix = mm.MakeZObjMatrix(standardModel);
             PrintStandardizedModel(RHSMatrix,XbMatrix,ObjMatrix);
-            SolveModel(StandardModel model, Matrix RHSMatrix, Matrix XbMatrix, Matrix ObjMatrix);
+            SolveModel(standardModel, RHSMatrix, XbMatrix, ObjMatrix);
             return null;
         }
 
@@ -130,7 +130,9 @@ namespace RaikesSimplexService.Joel
 
         private void SolveModel(StandardModel model, Matrix RHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
         {
-            int[] basicMatrix = findFirstBasic(model);
+            int[] basic = findFirstBasic(model);
+            //for loop
+            Matrix basicMatrix = createBasicMatrix(basic, RHSMatrix);
         }
 
         private int[] findFirstBasic(StandardModel model)
@@ -154,6 +156,17 @@ namespace RaikesSimplexService.Joel
                 }
             }
             return basic;
+        }
+
+        private Matrix createBasicMatrix(int[] basic, Matrix RHSMatrix)
+        {
+            Matrix basicMatrix = new Matrix();
+            for (int i = 0; i < basic.Length; i++)
+            {
+                Matrix temp = RHSMatrix.Column(i + 1);
+                basicMatrix.InsertColumn(temp, i + 1);
+            }
+            return basicMatrix;
         }
 
     }
