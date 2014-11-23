@@ -160,9 +160,13 @@ namespace RaikesSimplexService.Joel
                     }
                     if (CnPrimes.Min() < 0)
                     {
-                        int index = Array.IndexOf(CnPrimes, CnPrimes.Min());
+                        int entering = Array.IndexOf(CnPrimes, CnPrimes.Min());
                     }
+
                 }
+                int exiting;
+                int exitingIndex = Array.IndexOf(basic, exiting);
+                basic[exitingIndex] = entering;
             }
         }
 
