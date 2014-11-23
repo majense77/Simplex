@@ -56,6 +56,7 @@
     <Compile Include="DataModel\SolutionQuality.cs" />
     <Compile Include="DataModel\StandardModel.cs" />
     <Compile Include="DataModel\Matrix.cs" />
+    <Compile Include="Implementation\MatrixMaker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Implementation\Solver.cs" />
   </ItemGroup>

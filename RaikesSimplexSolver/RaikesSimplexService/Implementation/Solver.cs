@@ -17,9 +17,10 @@ namespace RaikesSimplexService.Joel
         {
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
-            Matrix RHSMatrix = MakeRHSMatrix(standardModel);
-            Matrix XbMatrix = MakeLHSMatrix(standardModel);
-            Matrix ObjMatrix = MakeZObjMatrix(standardModel);
+            MatrixMaker mm = new MatrixMaker();
+            Matrix RHSMatrix = mm.MakeRHSMatrix(standardModel);
+            Matrix XbMatrix = mm.MakeLHSMatrix(standardModel);
+            Matrix ObjMatrix = mm.MakeZObjMatrix(standardModel);
             PrintStandardizedModel(RHSMatrix,XbMatrix,ObjMatrix);
             return null;
         }
@@ -53,76 +54,6 @@ namespace RaikesSimplexService.Joel
                 newModel.GoalKind = GoalKind.Maximize;
             }
             return newModel;
-        }
-
-        private Matrix MakeRHSMatrix(StandardModel standardModel)
-        {
-            int numConstraints = standardModel.Constraints.Count;
-            int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
-            int numSVars = standardModel.SVariables.ToArray().Length;
-            double[,] RHSArr = new double[numConstraints, 1];
-            int numAVars = standardModel.ArtificialVars.ToArray().Length;
-            for (int i = 0; i < numConstraints; i++)
-            {
-                RHSArr[i, 0] = standardModel.Constraints[i].Value;
-            }
-            Matrix RHSMatrix = new Matrix(RHSArr);
-            return RHSMatrix;
-        }
-
-        private Matrix MakeLHSMatrix(StandardModel standardModel) {
-            int numConstraints = standardModel.Constraints.Count;
-            int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
-            int numSVars = standardModel.SVariables.ToArray().Length;
-            int numAVars = standardModel.ArtificialVars.ToArray().Length;
-            double[,] LHSArr = new double[numConstraints,numCoefficients + numSVars + numAVars];
-            for (int i = 0; i < numConstraints; i++)
-            {
-                for (int j = 0; j < numCoefficients; j++)
-                {
-                    LHSArr[i, j] = standardModel.Constraints[i].Coefficients[j];
-                }
-                for (int j = 0; j < numSVars; j++) {
-                    if (standardModel.SVariables.ContainsKey(j))
-                    {
-                        if (i == j)
-                            LHSArr[i, j + numCoefficients] = standardModel.SVariables[j];
-                        else
-                            LHSArr[i, j + numCoefficients] = 0;
-                    }
-                }
-                for (int j = 0; j < numAVars; j++)
-                {
-                    if (standardModel.ArtificialVars.ContainsKey(j)) 
-                    {
-                        if (i == j)
-                            LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
-                        else
-                            LHSArr[i, j + numCoefficients + numSVars] = 0;
-                    }
-                }
-            }
-            Matrix LHSMatrix = new Matrix(LHSArr);
-            return LHSMatrix;
-        }
-
-        private Matrix MakeZObjMatrix(StandardModel standardModel)
-        {
-            int numConstraints = standardModel.Constraints.Count;
-            int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
-            int numSVars = standardModel.SVariables.ToArray().Length;
-            int numAVars = standardModel.ArtificialVars.ToArray().Length;
-            double[,] ObjArr = new double[1, numCoefficients + numSVars + numAVars];
-            for (int i = 0; i < numCoefficients; i++)
-            {
-                ObjArr[0, i] = standardModel.Goal.Coefficients[i];
-            }
-            for (int i = 0; i < numSVars + numAVars; i++)
-            {
-                ObjArr[0, numCoefficients + i] = 0;
-            }
-            Matrix ObjMatrix = new Matrix(ObjArr);
-            return ObjMatrix;
         }
 
         public void PrintInput(Model model)
