@@ -127,5 +127,10 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.Write("\t  [\t" + Z.ToString());
         }
 
+        private Matrix Invert(Matrix matrix) 
+        {
+            return matrix.Inverse();
+        }
     }
+
 }
