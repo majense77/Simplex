@@ -130,24 +130,27 @@ namespace RaikesSimplexService.Joel
 
         private void SolveModel(StandardModel model, Matrix RHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
         {
-            bool[] basicMatrix = findFirstBasic(model);
+            int[] basicMatrix = findFirstBasic(model);
         }
 
-        private bool[] findFirstBasic(StandardModel model)
+        private int[] findFirstBasic(StandardModel model)
         {
             int numCoefficients = model.Constraints[0].Coefficients.Length;
             int numSVars = model.SVariables.Count;
             int numAVars = model.ArtificialVars.Count;
-            bool[] basic = new bool[numCoefficients + numSVars + numAVars];
+            int[] basic = new int[numSVars];
+            //bool[] basic = new bool[numCoefficients + numSVars + numAVars];
             for (int i = 0; i < numSVars; i++)
             {
                 if (model.ArtificialVars.ContainsKey(i))
                 {
-                    basic[numCoefficients + numSVars + i] = true;
+                    //basic[numCoefficients + numSVars + i] = true;
+                    basic[i] = numCoefficients + numSVars + i;
                 }
                 else
                 {
-                    basic[numCoefficients + i] = true;
+                    //basic[numCoefficients + i] = true;
+                    basic[i] = numCoefficients + i;
                 }
             }
             return basic;
