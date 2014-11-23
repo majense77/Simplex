@@ -18,11 +18,11 @@ namespace RaikesSimplexService.Joel
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
             MatrixMaker mm = new MatrixMaker();
-            Matrix RHSMatrix = mm.MakeRHSMatrix(standardModel);
-            Matrix XbMatrix = mm.MakeLHSMatrix(standardModel);
+            Matrix XbMatrix = mm.MakeRHSMatrix(standardModel);
+            Matrix LHSMatrix = mm.MakeLHSMatrix(standardModel);
             Matrix ObjMatrix = mm.MakeZObjMatrix(standardModel);
-            PrintStandardizedModel(RHSMatrix,XbMatrix,ObjMatrix);
-            SolveModel(standardModel, RHSMatrix, XbMatrix, ObjMatrix);
+            PrintStandardizedModel(XbMatrix,LHSMatrix,ObjMatrix);
+            SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
             return null;
         }
 
@@ -128,11 +128,11 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.Write("\t  [\t" + Z.ToString());
         }
 
-        private void SolveModel(StandardModel model, Matrix RHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
+        private void SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
         {
             int[] basic = findFirstBasic(model);
             //for loop
-            Matrix basicMatrix = createBasicMatrix(basic, RHSMatrix);
+            Matrix basicMatrix = createBasicMatrix(basic, LHSMatrix);
         }
 
         private int[] findFirstBasic(StandardModel model)
@@ -158,14 +158,15 @@ namespace RaikesSimplexService.Joel
             return basic;
         }
 
-        private Matrix createBasicMatrix(int[] basic, Matrix RHSMatrix)
+        private Matrix createBasicMatrix(int[] basic, Matrix LHSMatrix)
         {
             Matrix basicMatrix = new Matrix();
             for (int i = 0; i < basic.Length; i++)
             {
-                Matrix temp = RHSMatrix.Column(i + 1);
-                basicMatrix.InsertColumn(temp, i + 1);
+                Matrix temp = LHSMatrix.Column(basic[i]+1);
+                basicMatrix.InsertColumn(temp, i+1);
             }
+            //System.Diagnostics.Debug.Write(basicMatrix.ToString());
             return basicMatrix;
         }
 
