@@ -22,6 +22,7 @@ namespace RaikesSimplexService.Joel
             Matrix XbMatrix = mm.MakeLHSMatrix(standardModel);
             Matrix ObjMatrix = mm.MakeZObjMatrix(standardModel);
             PrintStandardizedModel(RHSMatrix,XbMatrix,ObjMatrix);
+            SolveModel(StandardModel model, Matrix RHSMatrix, Matrix XbMatrix, Matrix ObjMatrix);
             return null;
         }
 
@@ -125,6 +126,34 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.Write("\t  [\t" + Xb.ToString());
             System.Diagnostics.Debug.WriteLine("\n\tObjective Row:");
             System.Diagnostics.Debug.Write("\t  [\t" + Z.ToString());
+        }
+
+        private void SolveModel(StandardModel model, Matrix RHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
+        {
+            int[] basicMatrix = findFirstBasic(model);
+        }
+
+        private int[] findFirstBasic(StandardModel model)
+        {
+            int numCoefficients = model.Constraints[0].Coefficients.Length;
+            int numSVars = model.SVariables.Count;
+            int numAVars = model.ArtificialVars.Count;
+            int[] basic = new int[numSVars];
+            //bool[] basic = new bool[numCoefficients + numSVars + numAVars];
+            for (int i = 0; i < numSVars; i++)
+            {
+                if (model.ArtificialVars.ContainsKey(i))
+                {
+                    //basic[numCoefficients + numSVars + i] = true;
+                    basic[i] = numCoefficients + numSVars + i;
+                }
+                else
+                {
+                    //basic[numCoefficients + i] = true;
+                    basic[i] = numCoefficients + i;
+                }
+            }
+            return basic;
         }
 
     }
