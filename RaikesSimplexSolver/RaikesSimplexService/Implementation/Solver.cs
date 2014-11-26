@@ -130,7 +130,7 @@ namespace RaikesSimplexService.Joel
 
         private Solution SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
         {
-            int[] basic = findFirstBasic(model);
+            int[] basic = FindFirstBasic(model);
             Boolean optimized = false;
             if (model.Goal.Coefficients.Min() > 0) {
                 optimized = true;
@@ -143,8 +143,8 @@ namespace RaikesSimplexService.Joel
             List<Matrix> PnPrimes = new List<Matrix>();
             while (!optimized)
             {
-                Matrix basicMatrix = createBasicMatrix(basic, LHSMatrix);
-                Matrix Cb = createCbMatrix(basic, ObjMatrix);
+                Matrix basicMatrix = CreateBasicMatrix(basic, LHSMatrix);
+                Matrix Cb = CreateCbMatrix(basic, ObjMatrix);
                 Matrix inverse = Invert(basicMatrix);
                 for (int i = 0; i < length; i++)
                 {
@@ -173,34 +173,10 @@ namespace RaikesSimplexService.Joel
                 else 
                 {
                     optimized = true;
-                    Solution solution = new Solution();
-                    double[] decisions = new double[numCoefficients];
-                    for (int i = 0; i < basic.Length; i++)
-                    {
-                        if (basic[i] < numCoefficients)
-                        {
-                            decisions[basic[i]] = Double.Parse(XbPrime.RowSum(i + 1).ToString());
-                        }
-                    }
-                    solution.Decisions = decisions;
-                    double optimalVal = 0;
-                    for (int i = 0; i < numCoefficients; i++ ) 
-                    {
-                        optimalVal += decisions[i] * model.Goal.Coefficients[i] * -1;
-                    }
-                    solution.OptimalValue = optimalVal;
-                    solution.AlternateSolutionsExist = false;
-                    solution.Quality = SolutionQuality.Optimal;
-                    return solution;
+                    return CreateSolution(basic, numCoefficients, XbPrime, model);
                 }
 
-                double[] ratios = new double[model.Constraints.Count];
-                for (int i = 0; i < model.Constraints.Count; i++ )
-                {
-                    double xbValue = Double.Parse(XbPrime.RowSum(i + 1).ToString());
-                    double pnValue = Double.Parse(PnPrimes[entering].RowSum(i + 1).ToString());
-                    ratios[i] = xbValue / pnValue;
-                }
+               double[] ratios = FindRatios(XbPrime, PnPrimes, model, entering);
 
                double min = ratios[0];
                int exitingColumn = 0;  //Change for unbounded stuff, eventually
@@ -219,7 +195,42 @@ namespace RaikesSimplexService.Joel
             return null;
         }
 
-        private int[] findFirstBasic(StandardModel model)
+        private Solution CreateSolution(int[] basic, int numCoefficients, Matrix XbPrime, StandardModel model)
+        {
+            Solution solution = new Solution();
+            double[] decisions = new double[numCoefficients];
+            for (int i = 0; i < basic.Length; i++)
+            {
+                if (basic[i] < numCoefficients)
+                {
+                    decisions[basic[i]] = Double.Parse(XbPrime.RowSum(i + 1).ToString());
+                }
+            }
+            solution.Decisions = decisions;
+            double optimalVal = 0;
+            for (int i = 0; i < numCoefficients; i++)
+            {
+                optimalVal += decisions[i] * model.Goal.Coefficients[i] * -1;
+            }
+            solution.OptimalValue = optimalVal;
+            solution.AlternateSolutionsExist = false;
+            solution.Quality = SolutionQuality.Optimal;
+            return solution;
+        }
+
+        private double[] FindRatios(Matrix XbPrime, List<Matrix> PnPrimes, StandardModel model, int entering) 
+        {
+            double[] ratios = new double[model.Constraints.Count];
+            for (int i = 0; i < model.Constraints.Count; i++)
+            {
+                double xbValue = Double.Parse(XbPrime.RowSum(i + 1).ToString());
+                double pnValue = Double.Parse(PnPrimes[entering].RowSum(i + 1).ToString());
+                ratios[i] = xbValue / pnValue;
+            }
+            return ratios;
+        }
+
+        private int[] FindFirstBasic(StandardModel model)
         {
             int numCoefficients = model.Constraints[0].Coefficients.Length;
             int numSVars = model.SVariables.Count;
@@ -242,7 +253,7 @@ namespace RaikesSimplexService.Joel
             return basic;
         }
 
-        private Matrix createBasicMatrix(int[] basic, Matrix LHSMatrix)
+        private Matrix CreateBasicMatrix(int[] basic, Matrix LHSMatrix)
         {
             Matrix basicMatrix = new Matrix();
             for (int i = 0; i < basic.Length; i++)
@@ -254,7 +265,7 @@ namespace RaikesSimplexService.Joel
             return basicMatrix;
         }
 
-        private Matrix createCbMatrix(int[] basic, Matrix ObjMatrix)
+        private Matrix CreateCbMatrix(int[] basic, Matrix ObjMatrix)
         {
             Matrix CbMatrix = new Matrix();
             for (int i = 0; i < basic.Length; i++)
