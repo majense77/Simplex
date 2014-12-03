@@ -8,7 +8,16 @@ namespace RaikesSimplexService.Joel
 {
     class MatrixMaker
     {
-        public Matrix MakeRHSMatrix(StandardModel standardModel)
+
+        public Matrix MakeRHSMatrix(StandardModel standardModel, bool twoPhase)
+        {
+            if (twoPhase)
+                return MakeRHS(standardModel);
+            else
+                return MakeARHS(standardModel);
+        }
+
+        private Matrix MakeRHS(StandardModel standardModel)
         {
             int numConstraints = standardModel.Constraints.Count;
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
@@ -23,7 +32,20 @@ namespace RaikesSimplexService.Joel
             return RHSMatrix;
         }
 
-        public Matrix MakeLHSMatrix(StandardModel standardModel)
+        private Matrix MakeARHS(StandardModel standardModel) 
+        {
+            return new Matrix();
+        }
+
+        public Matrix MakeLHSMatrix(StandardModel standardModel, bool twoPhase) 
+        {
+            if (twoPhase)
+                return MakeLHS(standardModel);
+            else
+                return MakeALHS(standardModel);
+        }
+
+        public Matrix MakeLHS(StandardModel standardModel)
         {
             int numConstraints = standardModel.Constraints.Count;
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
@@ -61,6 +83,11 @@ namespace RaikesSimplexService.Joel
             return LHSMatrix;
         }
 
+        private Matrix MakeALHS(StandardModel standardModel) 
+        {
+            return null;
+        }
+
         public Matrix MakeZObjMatrix(StandardModel standardModel)
         {
             int numConstraints = standardModel.Constraints.Count;
@@ -78,6 +105,11 @@ namespace RaikesSimplexService.Joel
             }
             Matrix ObjMatrix = new Matrix(ObjArr);
             return ObjMatrix;
+        }
+
+        public Matrix MakeWObjMatrix(StandardModel standardModel) 
+        {
+            return null;
         }
     }
 }

@@ -19,20 +19,24 @@ namespace RaikesSimplexService.Joel
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
             MatrixMaker mm = new MatrixMaker();
+            Matrix XbMatrix, LHSMatrix, ObjMatrix;
             bool twoPhase = TwoPhase(standardModel);
             if (!twoPhase)
             {
-                Matrix XbMatrix = mm.MakeRHSMatrix(standardModel);
-                Matrix LHSMatrix = mm.MakeLHSMatrix(standardModel);
-                Matrix ObjMatrix = mm.MakeZObjMatrix(standardModel);
+                XbMatrix = mm.MakeRHSMatrix(standardModel, false);
+                LHSMatrix = mm.MakeLHSMatrix(standardModel, false);
+                ObjMatrix = mm.MakeZObjMatrix(standardModel);
                 PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
-                Solution solution = SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
-                return solution;
             }
             else
             {
-                return null;
+                XbMatrix = mm.MakeRHSMatrix(standardModel, true);
+                LHSMatrix = mm.MakeLHSMatrix(standardModel, true);
+                ObjMatrix = mm.MakeWObjMatrix(standardModel);
+                PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
+                //return null;
             }
+            Solution solution = SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
         }
 
         private bool TwoPhase(StandardModel model) 
