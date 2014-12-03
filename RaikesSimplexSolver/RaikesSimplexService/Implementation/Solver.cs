@@ -172,14 +172,26 @@ namespace RaikesSimplexService.Joel
                 }
                 else 
                 {
-                    optimized = true;
                     Solution solution = new Solution();
+                    if (model.ArtificialVars.Count > 0)
+                    {
+                        for (int i = 0; i < numAVars; i++)
+                        {
+                            LHSMatrix.DeleteColumn(numCoefficients + numSVars + i + 1);
+                        }
+                        model.ArtificialVars.Clear();
+                        ObjMatrix = LHSMatrix.ExtractRow(model.Constraints.Count + 1);
+                        XbMatrix.DeleteRow(model.Constraints.Count + 1);
+                        solution = SolveModel(model, LHSMatrix, XbMatrix, ObjMatrix, basic);
+                        return solution;
+                    }
+                    optimized = true;
                     double[] decisions = new double[numCoefficients];
                     for (int i = 0; i < basic.Length; i++)
                     {
                         if (basic[i] < numCoefficients)
                         {
-                            decisions[basic[i]] = Double.Parse(XbPrime.RowSum(i + 1).ToString());
+                            decisions[basic[i]] = Double.Parse(XbPrime.RowSum(basic[i] + 1).ToString());
                         }
                     }
                     solution.Decisions = decisions;
@@ -204,6 +216,95 @@ namespace RaikesSimplexService.Joel
 
                double min = ratios[0];
                int exitingColumn = 0;  //Change for unbounded stuff, eventually
+                for (int i = 0; i < ratios.Length; i++)
+                {
+                    if (ratios[i] < min && ratios[i] > 0)
+                    {
+                        min = ratios[i];
+                        exitingColumn = i;
+                    }
+                }
+
+                //int exitingIndex = Array.IndexOf(basic, exitingColumn);
+                basic[exitingColumn] = entering;
+            }
+            return null;
+        }
+
+        /**
+         * For the second part of a two-phase revised
+         */
+        private Solution SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix, int[] basic)
+        {
+            Boolean optimized = false;
+            int numCoefficients = model.Constraints[0].Coefficients.Length;
+            int numSVars = model.SVariables.Count;
+            int length = numCoefficients + numSVars;
+            double[] CnPrimes = new double[length];
+            List<Matrix> PnPrimes = new List<Matrix>();
+            while (!optimized)
+            {
+                Matrix basicMatrix = createBasicMatrix(basic, LHSMatrix);
+                Matrix Cb = createCbMatrix(basic, ObjMatrix);
+                Matrix inverse = Invert(basicMatrix);
+                for (int i = 0; i < length; i++)
+                {
+                    if (!basic.Contains(i))
+                    {
+                        Matrix Pn = LHSMatrix.Column(i + 1);
+                        Matrix PnPrime = inverse * Pn;
+                        PnPrimes.Add(PnPrime);
+                        double Cn = Double.Parse(ObjMatrix.ColumnSum(i + 1).ToString());
+                        double herp = Double.Parse((Cb * PnPrime).ColumnSum(1).ToString());
+                        double CnPrime = Cn - herp;
+                        CnPrimes[i] = CnPrime;
+                    }
+                    else
+                    {
+                        CnPrimes[i] = 0;
+                    }
+                }
+
+                Matrix XbPrime = inverse * XbMatrix;
+                int entering = 0;
+                if (CnPrimes.Min() < 0)
+                {
+                    entering = Array.IndexOf(CnPrimes, CnPrimes.Min());
+                }
+                else
+                {
+                    optimized = true;
+                    Solution solution = new Solution();
+                    double[] decisions = new double[numCoefficients];
+                    for (int i = 0; i < basic.Length; i++)
+                    {
+                        if (basic[i] < numCoefficients)
+                        {
+                            decisions[basic[i]] = Double.Parse(XbPrime.RowSum(basic[i] + 1).ToString());
+                        }
+                    }
+                    solution.Decisions = decisions;
+                    double optimalVal = 0;
+                    for (int i = 0; i < numCoefficients; i++)
+                    {
+                        optimalVal += decisions[i] * model.Goal.Coefficients[i] * -1;
+                    }
+                    solution.OptimalValue = optimalVal;
+                    solution.AlternateSolutionsExist = false;
+                    solution.Quality = SolutionQuality.Optimal;
+                    return solution;
+                }
+
+                double[] ratios = new double[model.Constraints.Count];
+                for (int i = 0; i < model.Constraints.Count; i++)
+                {
+                    double xbValue = Double.Parse(XbPrime.RowSum(i + 1).ToString());
+                    double pnValue = Double.Parse(PnPrimes[entering].RowSum(i + 1).ToString());
+                    ratios[i] = xbValue / pnValue;
+                }
+
+                double min = ratios[0];
+                int exitingColumn = 0;  //Change for unbounded stuff, eventually
                 for (int i = 0; i < ratios.Length; i++)
                 {
                     if (ratios[i] < min && ratios[i] > 0)
