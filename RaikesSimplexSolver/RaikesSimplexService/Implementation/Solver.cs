@@ -34,9 +34,8 @@ namespace RaikesSimplexService.Joel
                 LHSMatrix = mm.MakeLHSMatrix(standardModel, true);
                 ObjMatrix = mm.MakeWObjMatrix(standardModel);
                 PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
-                //return null;
             }
-            Solution solution = SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
+            return SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
         }
 
         private bool TwoPhase(StandardModel model) 
