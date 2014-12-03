@@ -13,6 +13,8 @@ namespace RaikesSimplexService.Joel
 
     public class Solver : ISolver
     {
+        public bool artificials { get; set; }
+
         public Solution Solve(Model model)
         {
             PrintInput(model);
