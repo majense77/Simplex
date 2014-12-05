@@ -189,13 +189,14 @@ namespace RaikesSimplexService.Joel
             }
             int Coeff = standardModel.Constraints[0].Coefficients.Count();
             int SVars = standardModel.SVariables.Count;
-            double[] WRow = new double[Coeff + standardModel.SVariables.Count];
+            int AVars = standardModel.ArtificialVars.Count;
+            double[,] WRow = new double[1,Coeff + standardModel.SVariables.Count + AVars];
             for (int i = 0; i < ARows.Count; i++)
             {
                 Matrix row = ARows[i];
                 for (int j = 0; j < Coeff + SVars; j++)
                 {
-                    WRow[j] -= Double.Parse(row.ColumnSum(j + 1).ToString());
+                    WRow[0,j] -= Double.Parse(row.RowSum(j + 1).ToString());
                 }
             }
             Matrix WRowMatrix = new Matrix(WRow);
