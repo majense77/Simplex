@@ -11,7 +11,7 @@ namespace RaikesSimplexService.Joel
 
         public Matrix MakeRHSMatrix(StandardModel standardModel, bool twoPhase)
         {
-            if (twoPhase)
+            if (!twoPhase)
                 return MakeRHS(standardModel);
             else
                 return MakeARHS(standardModel);
@@ -37,7 +37,7 @@ namespace RaikesSimplexService.Joel
             int numConstraints = standardModel.Constraints.Count;
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
             int numSVars = standardModel.SVariables.ToArray().Length;
-            double[,] RHSArr = new double[numConstraints, 1];
+            double[,] RHSArr = new double[numConstraints + 1, 1];
             int numAVars = standardModel.ArtificialVars.ToArray().Length;
             for (int i = 0; i <= numConstraints; i++)
             {
@@ -56,7 +56,7 @@ namespace RaikesSimplexService.Joel
 
         public Matrix MakeLHSMatrix(StandardModel standardModel, bool twoPhase) 
         {
-            if (twoPhase)
+            if (!twoPhase)
                 return MakeLHS(standardModel);
             else
                 return MakeALHS(standardModel);
@@ -106,37 +106,11 @@ namespace RaikesSimplexService.Joel
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
             int numSVars = standardModel.SVariables.ToArray().Length;
             int numAVars = standardModel.ArtificialVars.ToArray().Length;
-            double[,] LHSArr = new double[numConstraints, numCoefficients + numSVars + numAVars];
+            double[,] LHSArr = new double[numConstraints + 1, numCoefficients + numSVars + numAVars];
             for (int i = 0; i <= numConstraints; i++)
             {
-                //Most of the matrix
-                for (int j = 0; j < numCoefficients; j++)
-                {
-                    LHSArr[i, j] = standardModel.Constraints[i].Coefficients[j];
-                }
-                for (int j = 0; j < numSVars; j++)
-                {
-                    if (standardModel.SVariables.ContainsKey(j))
-                    {
-                        if (i == j)
-                            LHSArr[i, j + numCoefficients] = standardModel.SVariables[j];
-                        else
-                            LHSArr[i, j + numCoefficients] = 0;
-                    }
-                }
-                for (int j = 0; j < numAVars; j++)
-                {
-                    if (standardModel.ArtificialVars.ContainsKey(j))
-                    {
-                        if (i == j)
-                            LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
-                        else
-                            LHSArr[i, j + numCoefficients + numSVars] = 0;
-                    }
-                }
-
                 //Z-Row
-                if (i == numConstraints) 
+                if (i == numConstraints)
                 {
                     for (int j = 0; j < numCoefficients; j++)
                     {
@@ -149,6 +123,34 @@ namespace RaikesSimplexService.Joel
                     for (int j = 0; j < numAVars; j++)
                     {
                         LHSArr[i, j + numCoefficients + numSVars] = 0;
+                    }
+                }
+                else
+                {
+                    //Most of the matrix
+                    for (int j = 0; j < numCoefficients; j++)
+                    {
+                        LHSArr[i, j] = standardModel.Constraints[i].Coefficients[j];
+                    }
+                    for (int j = 0; j < numSVars; j++)
+                    {
+                        if (standardModel.SVariables.ContainsKey(j))
+                        {
+                            if (i == j)
+                                LHSArr[i, j + numCoefficients] = standardModel.SVariables[j];
+                            else
+                                LHSArr[i, j + numCoefficients] = 0;
+                        }
+                    }
+                    for (int j = 0; j < numAVars; j++)
+                    {
+                        if (standardModel.ArtificialVars.ContainsKey(j))
+                        {
+                            if (i == j)
+                                LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
+                            else
+                                LHSArr[i, j + numCoefficients + numSVars] = 0;
+                        }
                     }
                 }
             }
