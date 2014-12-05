@@ -13,17 +13,39 @@ namespace RaikesSimplexService.Joel
 
     public class Solver : ISolver
     {
+
         public Solution Solve(Model model)
         {
             PrintInput(model);
             StandardModel standardModel = StandardizeModel(model);
             MatrixMaker mm = new MatrixMaker();
-            Matrix XbMatrix = mm.MakeRHSMatrix(standardModel);
-            Matrix LHSMatrix = mm.MakeLHSMatrix(standardModel);
-            Matrix ObjMatrix = mm.MakeZObjMatrix(standardModel);
-            PrintStandardizedModel(XbMatrix,LHSMatrix,ObjMatrix);
-            Solution solution = SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
-            return solution;
+            Matrix XbMatrix, LHSMatrix, ObjMatrix;
+            bool twoPhase = TwoPhase(standardModel);
+            if (!twoPhase)
+            {
+                XbMatrix = mm.MakeRHSMatrix(standardModel, false);
+                LHSMatrix = mm.MakeLHSMatrix(standardModel, false);
+                ObjMatrix = mm.MakeZObjMatrix(standardModel);
+                PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
+            }
+            else
+            {
+                XbMatrix = mm.MakeRHSMatrix(standardModel, true);
+                LHSMatrix = mm.MakeLHSMatrix(standardModel, true);
+                ObjMatrix = mm.MakeWObjMatrix(standardModel, LHSMatrix);
+                PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
+            }
+            return SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
+        }
+
+        private bool TwoPhase(StandardModel model) 
+        {
+            bool twoPhase = false;
+            if (model.ArtificialVars.ToArray().Length > 0) 
+            {
+                twoPhase = true;
+            }
+            return twoPhase;
         }
 
         private StandardModel StandardizeModel(Model model) {
