@@ -177,9 +177,29 @@ namespace RaikesSimplexService.Joel
             return ObjMatrix;
         }
 
-        public Matrix MakeWObjMatrix(StandardModel standardModel) 
+        public Matrix MakeWObjMatrix(StandardModel standardModel, Matrix LHSMatrix) 
         {
-            return null;
+            List<Matrix> ARows = new List<Matrix>();
+            for (int i = 0; i < standardModel.SVariables.Count; i++)
+            {
+                if (standardModel.ArtificialVars.ContainsKey(i))
+                {
+                    ARows.Add(LHSMatrix.Row(i + 1));
+                }
+            }
+            int Coeff = standardModel.Constraints[0].Coefficients.Count();
+            int SVars = standardModel.SVariables.Count;
+            double[] WRow = new double[Coeff + standardModel.SVariables.Count];
+            for (int i = 0; i < ARows.Count; i++)
+            {
+                Matrix row = ARows[i];
+                for (int j = 0; j < Coeff + SVars; j++)
+                {
+                    WRow[j] -= Double.Parse(row.ColumnSum(j + 1).ToString());
+                }
+            }
+            Matrix WRowMatrix = new Matrix(WRow);
+            return WRowMatrix;
         }
     }
 }

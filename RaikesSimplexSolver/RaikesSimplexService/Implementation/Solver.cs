@@ -32,7 +32,7 @@ namespace RaikesSimplexService.Joel
             {
                 XbMatrix = mm.MakeRHSMatrix(standardModel, true);
                 LHSMatrix = mm.MakeLHSMatrix(standardModel, true);
-                ObjMatrix = mm.MakeWObjMatrix(standardModel);
+                ObjMatrix = mm.MakeWObjMatrix(standardModel, LHSMatrix);
                 PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
             }
             return SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
