@@ -106,52 +106,70 @@ namespace RaikesSimplexService.Joel
             int numCoefficients = standardModel.Constraints[0].Coefficients.Length;
             int numSVars = standardModel.SVariables.ToArray().Length;
             int numAVars = standardModel.ArtificialVars.ToArray().Length;
-            double[,] LHSArr = new double[numConstraints + 1, numCoefficients + numSVars + numAVars];
+            double[,] LHSArr = new double[numConstraints + 1, 1 + numCoefficients + numSVars + numAVars];
+            int actualNumAVars = 0;
             for (int i = 0; i <= numConstraints; i++)
             {
                 //Z-Row
                 if (i == numConstraints)
                 {
+                    int ifMax = 1;
+                    if (standardModel.GoalKind == GoalKind.Maximize)
+                    {
+                        ifMax = -1;
+                    }
+                    LHSArr[i, 0] = 1;
+
                     for (int j = 0; j < numCoefficients; j++)
                     {
-                        LHSArr[i, j] = standardModel.Goal.Coefficients[j];
+                        LHSArr[i, j + 1] = ifMax * standardModel.Goal.Coefficients[j];
                     }
                     for (int j = 0; j < numSVars; j++)
                     {
-                        LHSArr[i, j + numCoefficients] = 0;
+                        LHSArr[i, j + numCoefficients + 1] = 0;
                     }
                     for (int j = 0; j < numAVars; j++)
                     {
-                        LHSArr[i, j + numCoefficients + numSVars] = 0;
+                        LHSArr[i, j + numCoefficients + numSVars + 1] = 0;
                     }
                 }
                 else
                 {
                     //Most of the matrix
+
+                    LHSArr[i, 0] = 0;
                     for (int j = 0; j < numCoefficients; j++)
                     {
-                        LHSArr[i, j] = standardModel.Constraints[i].Coefficients[j];
+                        LHSArr[i, j + 1] = standardModel.Constraints[i].Coefficients[j];
                     }
                     for (int j = 0; j < numSVars; j++)
                     {
                         if (standardModel.SVariables.ContainsKey(j))
                         {
                             if (i == j)
-                                LHSArr[i, j + numCoefficients] = standardModel.SVariables[j];
+                            {
+                                LHSArr[i, j + numCoefficients + 1] = standardModel.SVariables[j];
+                                if (standardModel.SVariables[j] == -1)
+                                {
+                                    LHSArr[i, actualNumAVars + numCoefficients + numSVars + 1] = standardModel.ArtificialVars[j];
+                                    actualNumAVars++;
+                                }
+                            }
                             else
-                                LHSArr[i, j + numCoefficients] = 0;
+                                LHSArr[i, j + numCoefficients + 1] = 0;
                         }
                     }
-                    for (int j = 0; j < numAVars; j++)
+                    /*for (int j = 0; j < numAVars; j++)
                     {
                         if (standardModel.ArtificialVars.ContainsKey(j))
                         {
                             if (i == j)
-                                LHSArr[i, j + numCoefficients + numSVars] = standardModel.ArtificialVars[j];
+                                LHSArr[i, actualNumAVars + numCoefficients + numSVars + 1] = standardModel.ArtificialVars[j];
                             else
-                                LHSArr[i, j + numCoefficients + numSVars] = 0;
+                                LHSArr[i, actualNumAVars + numCoefficients + numSVars + 1] = 0;
+                            actualNumAVars++;
                         }
-                    }
+                    }*/
                 }
             }
             Matrix LHSMatrix = new Matrix(LHSArr);
@@ -165,9 +183,14 @@ namespace RaikesSimplexService.Joel
             int numSVars = standardModel.SVariables.ToArray().Length;
             int numAVars = standardModel.ArtificialVars.ToArray().Length;
             double[,] ObjArr = new double[1, numCoefficients + numSVars + numAVars];
+            int ifMax = 1;
+            if (standardModel.GoalKind == GoalKind.Maximize)
+            {
+                ifMax = -1;
+            }
             for (int i = 0; i < numCoefficients; i++)
             {
-                ObjArr[0, i] = standardModel.Goal.Coefficients[i];
+                ObjArr[0, i] = ifMax * standardModel.Goal.Coefficients[i];
             }
             for (int i = 0; i < numSVars + numAVars; i++)
             {
@@ -190,7 +213,7 @@ namespace RaikesSimplexService.Joel
             int Coeff = standardModel.Constraints[0].Coefficients.Count();
             int SVars = standardModel.SVariables.Count;
             int AVars = standardModel.ArtificialVars.Count;
-            double[,] WRow = new double[1,Coeff + standardModel.SVariables.Count + AVars];
+            double[,] WRow = new double[1,Coeff + standardModel.SVariables.Count + AVars + 1];
             for (int i = 0; i < ARows.Count; i++)
             {
                 Matrix row = ARows[i];

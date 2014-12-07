@@ -35,7 +35,7 @@ namespace RaikesSimplexService.Joel
                 ObjMatrix = mm.MakeWObjMatrix(standardModel, LHSMatrix);
                 PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
             }
-            return SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix);
+            return SolveModel(standardModel, LHSMatrix, XbMatrix, ObjMatrix, twoPhase);
         }
 
         private bool TwoPhase(StandardModel model) 
@@ -150,33 +150,48 @@ namespace RaikesSimplexService.Joel
             System.Diagnostics.Debug.Write("\t  [\t" + Z.ToString());
         }
 
-        private Solution SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix)
+        private Solution SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix, bool twoPhase)
         {
-            int[] basic = FindFirstBasic(model);
-            Boolean optimized = false;
-            if (model.Goal.Coefficients.Min() > 0) {
-                optimized = true;
-            }
+            int count = 0;
+            int[] basic = FindFirstBasic(model, twoPhase);
+            Boolean optimized = true;
             int numCoefficients = model.Constraints[0].Coefficients.Length;
             int numSVars = model.SVariables.Count;
             int numAVars = model.ArtificialVars.Count;
             int length = numCoefficients+numSVars+numAVars;
+            double objMin = 0;
+            if (twoPhase)
+            {
+                length++;
+            }
+            for (int i = 0; i < length; i++)
+            {
+                if (ObjMatrix[1, i + 1].Re < objMin)
+                {
+                    objMin = ObjMatrix[1, i + 1].Re;
+                }
+            }
+            if (objMin < 0)
+            {
+                optimized = false;
+            }
             double[] CnPrimes = new double[length];
-            List<Matrix> PnPrimes = new List<Matrix>();
-            while (!optimized)
+            Dictionary<int, Matrix> PnPrimes = new Dictionary<int, Matrix>();
+            while (!optimized && count < 50000)
             {
                 Matrix basicMatrix = CreateBasicMatrix(basic, LHSMatrix);
                 Matrix Cb = CreateCbMatrix(basic, ObjMatrix);
-                Matrix inverse = Invert(basicMatrix);
+                Matrix inverse = RoundMatrix(Invert(basicMatrix), basic.Length, basic.Length);
+                PnPrimes.Clear();
                 for (int i = 0; i < length; i++)
                 {
                     if (!basic.Contains(i))
                     {
                         Matrix Pn = LHSMatrix.Column(i + 1);
-                        Matrix PnPrime = inverse * Pn;
-                        PnPrimes.Add(PnPrime);
-                        double Cn = Double.Parse(ObjMatrix.ColumnSum(i + 1).ToString());
-                        double herp = Double.Parse((Cb * PnPrime).ColumnSum(1).ToString());
+                        Matrix PnPrime = RoundMatrix(inverse * Pn, basic.Length, 1);
+                        PnPrimes.Add(i, PnPrime);
+                        double Cn = ObjMatrix[1, i+1].Re;
+                        double herp = Math.Round(((Cb * PnPrime)[1, 1].Re), 5);
                         double CnPrime = Cn - herp;
                         CnPrimes[i] = CnPrime;
                     }
@@ -186,7 +201,21 @@ namespace RaikesSimplexService.Joel
                     }
                 }
 
-                Matrix XbPrime = inverse * XbMatrix;
+                Matrix XbPrime = RoundMatrix(inverse * XbMatrix, basic.Length, 1);
+                //infeasible - RHS constraint value is negative
+                int rows = model.Constraints.Count;
+                if (twoPhase)
+                {
+                    rows++;
+                }
+                if (!twoPhase)
+                {
+                    double XbPrimeMin = FindMatrixMin(XbPrime, rows, 1);
+                    if (XbPrimeMin < 0)
+                    {
+                        return CreateSolution(SolutionQuality.Infeasible);
+                    }
+                }
                 int entering = 0;
                 if (CnPrimes.Min() < 0)
                 {
@@ -197,35 +226,75 @@ namespace RaikesSimplexService.Joel
                     Solution solution = new Solution();
                     if (model.ArtificialVars.Count > 0)
                     {
+                        //checking if artificial variables are still basic
+                        if (basic.Max() > numCoefficients + numSVars)
+                        {
+                            return CreateSolution(SolutionQuality.Infeasible);
+                        }
                         for (int i = 0; i < numAVars; i++)
                         {
-                            LHSMatrix.DeleteColumn(numCoefficients + numSVars + i + 1);
+                            LHSMatrix.DeleteColumn(numCoefficients + numSVars + 2);
                         }
                         model.ArtificialVars.Clear();
                         ObjMatrix = LHSMatrix.ExtractRow(model.Constraints.Count + 1);
+                        Matrix temp = new Matrix();
+                        Matrix temp2;
+                        for (int i = 1; i < numCoefficients + numSVars + 1; i++)
+                        {
+                            temp2 = new Matrix(ObjMatrix[i+1, 1].Re);
+                            temp.InsertColumn(temp2, i);
+                        }
+                        ObjMatrix = temp;
+                        LHSMatrix.DeleteColumn(1);
                         XbMatrix.DeleteRow(model.Constraints.Count + 1);
-                        solution = SolveModel(model, LHSMatrix, XbMatrix, ObjMatrix, basic);
+                        PrintStandardizedModel(XbMatrix, LHSMatrix, ObjMatrix);
+                        int[] newBasic = new int[basic.Length-1];
+                        for (int i = 0; i < basic.Length - 1; i++)
+                        {
+                            newBasic[i] = basic[i + 1] - 1;
+                        }
+                        solution = SolveModel(model, LHSMatrix, XbMatrix, ObjMatrix, newBasic, false, count);
                         return solution;
                     }
                     optimized = true;
                     return CreateSolution(basic, numCoefficients, XbPrime, model);
                 }
 
-               double[] ratios = FindRatios(XbPrime, PnPrimes, model, entering);
+               double[] ratios = FindRatios(XbPrime, PnPrimes, model, entering, twoPhase);
 
                double min = ratios[0];
-               int exitingColumn = 0;  //Change for unbounded stuff, eventually
+               int exitingColumn = 0;
                 for (int i = 0; i < ratios.Length; i++)
                 {
-                    if (ratios[i] < min && ratios[i] > 0)
+                    if ((min <= 0 && ratios[i] > 0 ) || (ratios[i] < min && ratios[i] > 0))
                     {
                         min = ratios[i];
                         exitingColumn = i;
                     }
-                }
+                    if (twoPhase) {
+                    if (min == ratios[i])
+                        {
+                            if (!(basic[exitingColumn] > numCoefficients + numSVars) && (basic[i] > numCoefficients + numSVars))
+                            {
+                                min = ratios[i];
+                                exitingColumn = i;
+                            }
+                        }
+                    }
 
+                }
+                //unbounded
+                if (min <= 0)
+                {
+                    return CreateSolution(SolutionQuality.Unbounded);
+                }
                 //int exitingIndex = Array.IndexOf(basic, exitingColumn);
                 basic[exitingColumn] = entering;
+                count++;
+            }
+            if (count >= 50000)
+            {
+                return CreateSolution(SolutionQuality.TimedOut);
             }
             return null;
         }
@@ -233,28 +302,45 @@ namespace RaikesSimplexService.Joel
         /**
          * For the second part of a two-phase revised
          */
-        private Solution SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix, int[] basic)
+        private Solution SolveModel(StandardModel model, Matrix LHSMatrix, Matrix XbMatrix, Matrix ObjMatrix, int[] basic, bool twoPhase, int count)
         {
-            Boolean optimized = false;
+            bool optimized = true;
             int numCoefficients = model.Constraints[0].Coefficients.Length;
             int numSVars = model.SVariables.Count;
             int length = numCoefficients + numSVars;
+            double objMin = 0;
+            if (twoPhase)
+            {
+                length++;
+            }
+            for (int i = 0; i < length; i++)
+            {
+                if (ObjMatrix[1, i + 1].Re < objMin)
+                {
+                    objMin = ObjMatrix[1, i + 1].Re;
+                }
+            }
+            if (objMin < 0)
+            {
+                optimized = false;
+            }
             double[] CnPrimes = new double[length];
-            List<Matrix> PnPrimes = new List<Matrix>();
-            while (!optimized)
+            Dictionary<int, Matrix> PnPrimes = new Dictionary<int, Matrix>();
+            while (!optimized && count < 50000)
             {
                 Matrix basicMatrix = CreateBasicMatrix(basic, LHSMatrix);
                 Matrix Cb = CreateCbMatrix(basic, ObjMatrix);
-                Matrix inverse = Invert(basicMatrix);
+                Matrix inverse = RoundMatrix(Invert(basicMatrix), basic.Length, basic.Length);
+                PnPrimes.Clear();
                 for (int i = 0; i < length; i++)
                 {
                     if (!basic.Contains(i))
                     {
                         Matrix Pn = LHSMatrix.Column(i + 1);
-                        Matrix PnPrime = inverse * Pn;
-                        PnPrimes.Add(PnPrime);
-                        double Cn = Double.Parse(ObjMatrix.ColumnSum(i + 1).ToString());
-                        double herp = Double.Parse((Cb * PnPrime).ColumnSum(1).ToString());
+                        Matrix PnPrime = RoundMatrix(inverse * Pn, basic.Length, 1);
+                        PnPrimes.Add(i, PnPrime);
+                        double Cn = ObjMatrix[1, i + 1].Re;
+                        double herp = Math.Round(((Cb * PnPrime)[1, 1].Re), 5);
                         double CnPrime = Cn - herp;
                         CnPrimes[i] = CnPrime;
                     }
@@ -264,7 +350,17 @@ namespace RaikesSimplexService.Joel
                     }
                 }
 
-                Matrix XbPrime = inverse * XbMatrix;
+                Matrix XbPrime = RoundMatrix(inverse * XbMatrix, basic.Length, 1);
+                int rows = model.Constraints.Count;
+                if (twoPhase) {
+                    rows++;
+                }
+                double XbPrimeMin = FindMatrixMin(XbPrime, rows, 1);
+                //infeasible - RHS constraint value is negative
+                if (XbPrimeMin < 0)
+                {
+                    return CreateSolution(SolutionQuality.Infeasible);
+                }
                 int entering = 0;
                 if (CnPrimes.Min() < 0)
                 {
@@ -276,29 +372,69 @@ namespace RaikesSimplexService.Joel
                     return CreateSolution(basic, numCoefficients, XbPrime, model);
                 }
 
-                double[] ratios = new double[model.Constraints.Count];
-                for (int i = 0; i < model.Constraints.Count; i++)
-                {
-                    double xbValue = Double.Parse(XbPrime.RowSum(i + 1).ToString());
-                    double pnValue = Double.Parse(PnPrimes[entering].RowSum(i + 1).ToString());
-                    ratios[i] = xbValue / pnValue;
-                }
+                double[] ratios = FindRatios(XbPrime, PnPrimes, model, entering, twoPhase);
 
                 double min = ratios[0];
-                int exitingColumn = 0;  //Change for unbounded stuff, eventually
+                int exitingColumn = 0;
                 for (int i = 0; i < ratios.Length; i++)
                 {
-                    if (ratios[i] < min && ratios[i] > 0)
+                    if ((min <= 0 && ratios[i] > 0) || (ratios[i] < min && ratios[i] > 0))
                     {
                         min = ratios[i];
                         exitingColumn = i;
                     }
                 }
-
+                //unbounded
+                if (min <= 0)
+                {
+                    return CreateSolution(SolutionQuality.Unbounded);
+                }
                 //int exitingIndex = Array.IndexOf(basic, exitingColumn);
                 basic[exitingColumn] = entering;
+                count++;
+            }
+            //timed out
+            if (count >= 50000)
+            {
+                return CreateSolution(SolutionQuality.TimedOut);
+            }
+            if (optimized)
+            {
+                Matrix basicMatrix = CreateBasicMatrix(basic, LHSMatrix);
+                Matrix inverse = Invert(basicMatrix);
+                Matrix XbPrime = RoundMatrix(inverse * XbMatrix, basic.Length, 1);
+                return CreateSolution(basic, numCoefficients, XbPrime, model);
             }
             return null;
+        }
+
+        private double FindMatrixMin(Matrix matrix, int rows, int columns)
+        {
+            double min = matrix[1,1].Re;
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    if (matrix[i + 1, j + 1].Re < min)
+                    {
+                        min = matrix[i + 1, j + 1].Re;
+                    }
+                   
+                }
+            }
+            return min;
+        }
+
+        private Matrix RoundMatrix(Matrix matrix, int rows, int columns)
+        {
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    matrix[i + 1, j + 1].Re = Math.Round(matrix[i + 1, j + 1].Re, 5);
+                }
+            }
+            return matrix;
         }
 
         private Solution CreateSolution(int[] basic, int numCoefficients, Matrix XbPrime, StandardModel model)
@@ -309,7 +445,7 @@ namespace RaikesSimplexService.Joel
             {
                 if (basic[i] < numCoefficients)
                 {
-                    decisions[basic[i]] = Double.Parse(XbPrime.RowSum(i + 1).ToString());
+                    decisions[basic[i]] = XbPrime[i + 1, 1].Re;
                 }
             }
             solution.Decisions = decisions;
@@ -318,42 +454,77 @@ namespace RaikesSimplexService.Joel
             {
                 optimalVal += decisions[i] * model.Goal.Coefficients[i] * -1;
             }
+            if (optimalVal < 0)
+            {
+                optimalVal = optimalVal * -1;
+            }
             solution.OptimalValue = optimalVal;
             solution.AlternateSolutionsExist = false;
             solution.Quality = SolutionQuality.Optimal;
             return solution;
         }
 
-        private double[] FindRatios(Matrix XbPrime, List<Matrix> PnPrimes, StandardModel model, int entering) 
+        private Solution CreateSolution(SolutionQuality quality)
         {
-            double[] ratios = new double[model.Constraints.Count];
-            for (int i = 0; i < model.Constraints.Count; i++)
+            Solution solution = new Solution();
+            solution.Quality = quality;
+            return solution;
+        }
+
+        private double[] FindRatios(Matrix XbPrime, Dictionary<int, Matrix> PnPrimes, StandardModel model, int entering, bool twoPhase) 
+        {
+            int length = model.Constraints.Count;
+            if (twoPhase)
             {
-                double xbValue = Double.Parse(XbPrime.RowSum(i + 1).ToString());
-                double pnValue = Double.Parse(PnPrimes[entering].RowSum(i + 1).ToString());
-                ratios[i] = xbValue / pnValue;
+                length++;
+            }
+            double[] ratios = new double[length];
+            for (int i = 0; i < length; i++)
+            {
+                double xbValue = XbPrime[i + 1, 1].Re;
+                double pnValue = PnPrimes[entering][i+1,1].Re;
+                if (pnValue != 0)
+                {
+                    ratios[i] = Math.Round((xbValue / pnValue), 5);
+                } else {
+                    ratios[i] = double.PositiveInfinity;
+                }
             }
             return ratios;
         }
 
-        private int[] FindFirstBasic(StandardModel model)
+        private int[] FindFirstBasic(StandardModel model, bool twoPhase)
         {
             int numCoefficients = model.Constraints[0].Coefficients.Length;
             int numSVars = model.SVariables.Count;
             int numAVars = model.ArtificialVars.Count;
-            int[] basic = new int[numSVars];
+            int basicLength = numSVars;
+            if (twoPhase)
+            {
+                basicLength++;
+            }
+            int[] basic = new int[basicLength];
             //bool[] basic = new bool[numCoefficients + numSVars + numAVars];
+            int accForTwoPhase = 0;
+            if (twoPhase)
+            {
+                basic[0] = 0;
+                accForTwoPhase = 1;
+            }
+            int basicAVars = 0;
             for (int i = 0; i < numSVars; i++)
             {
+                
                 if (model.ArtificialVars.ContainsKey(i))
                 {
                     //basic[numCoefficients + numSVars + i] = true;
-                    basic[i] = numCoefficients + numSVars + i;
+                    basic[i + accForTwoPhase] = numCoefficients + numSVars + basicAVars + accForTwoPhase;
+                    basicAVars++;
                 }
                 else
                 {
                     //basic[numCoefficients + i] = true;
-                    basic[i] = numCoefficients + i;
+                    basic[i + accForTwoPhase] = numCoefficients + i + accForTwoPhase;
                 }
             }
             return basic;
@@ -384,7 +555,7 @@ namespace RaikesSimplexService.Joel
 
         private Matrix Invert(Matrix matrix)
         {
-            return matrix.Inverse();
+            return matrix.InverseLeverrier();
         }
     }
 
