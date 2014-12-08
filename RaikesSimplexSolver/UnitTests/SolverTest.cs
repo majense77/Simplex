@@ -77,7 +77,6 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 8, 12 },
                 Relationship = Relationship.GreaterThanOrEquals,
-                //Relationship = Relationship.LessThanOrEquals,
                 Value = 24
             };
 
@@ -85,7 +84,6 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 12, 12 },
                 Relationship = Relationship.GreaterThanOrEquals,
-                //Relationship = Relationship.LessThanOrEquals,
                 Value = 36
             };
 
@@ -93,7 +91,6 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 2, 1 },
                 Relationship = Relationship.GreaterThanOrEquals,
-                //Relationship = Relationship.LessThanOrEquals,
                 Value = 4
             };
 
@@ -101,7 +98,6 @@ namespace UnitTests
             {
                 Coefficients = new double[2] { 1, 1 },
                 Relationship = Relationship.LessThanOrEquals,
-                //Relationship = Relationship.Equals,
                 Value = 5
             };
 
@@ -117,7 +113,6 @@ namespace UnitTests
             {
                 Constraints = constraints,
                 Goal = goal,
-                //GoalKind = GoalKind.Maximize
                 GoalKind = GoalKind.Minimize
             };
             
@@ -129,54 +124,6 @@ namespace UnitTests
                 OptimalValue = 0.6
             };
             #endregion
-
-            //#region Test2
-            //var target = new Solver();
-
-            //var lc1 = new LinearConstraint()
-            //{
-            //    Coefficients = new double[2] { 2, 1 },
-            //    Relationship = Relationship.LessThanOrEquals,
-            //    Value = 32
-            //};
-
-            //var lc2 = new LinearConstraint()
-            //{
-            //    Coefficients = new double[2] { 1, 1 },
-            //    Relationship = Relationship.LessThanOrEquals,
-            //    Value = 18
-            //};
-
-            //var lc3 = new LinearConstraint()
-            //{
-            //    Coefficients = new double[2] { 1, 3 },
-            //    Relationship = Relationship.LessThanOrEquals,
-            //    Value = 36
-            //};
-
-            //var constraints = new List<LinearConstraint>() { lc1, lc2, lc3 };
-
-            //var goal = new Goal()
-            //{
-            //    Coefficients = new double[2] { 80, 70 },
-            //    ConstantTerm = 0
-            //};
-
-            //var model = new Model()
-            //{
-            //    Constraints = constraints,
-            //    Goal = goal,
-            //    GoalKind = GoalKind.Minimize
-            //};
-
-            //var expected = new Solution()
-            //{
-            //    Decisions = new double[2] { 14, 4 },
-            //    Quality = SolutionQuality.Optimal,
-            //    AlternateSolutionsExist = false,
-            //    OptimalValue = 1400
-            //};
-            //#endregion
 
             //Act
             var actual = target.Solve(model);
@@ -470,6 +417,389 @@ namespace UnitTests
 
             //Assert
             Assert.AreEqual(expected.Quality, actual.Quality);
+        }
+
+        /// <summary>
+        ///A test for Solve
+        ///</summary>
+        [TestMethod()]
+        public void ExampleSolveTest7()
+        {
+            #region Test3
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 2, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 16
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 10
+            };
+            var constraints = new List<LinearConstraint>() { lc1, lc2 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 6, 3 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                AlternateSolutionsExist = true
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+        /// <summary>
+        ///A test for Solve
+        ///</summary>
+        [TestMethod()]
+        public void ExampleSolveTest8()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 2, 1 },
+                //Relationship = Relationship.GreaterThanOrEquals,
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 32
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                //Relationship = Relationship.GreaterThanOrEquals,
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 18
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 3 },
+                //Relationship = Relationship.GreaterThanOrEquals,
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 36
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3};
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 80, 70 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 14, 4 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 1400
+            };
+            #endregion
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+        /// <summary>
+        ///A test for Solve
+        ///Actually passes, but solution values are off by a rounding error
+        ///</summary>
+        [TestMethod()]
+        public void HW4No1()
+        {
+            #region Arrange
+            var target = new Solver();            
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 1
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 2, -1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 1
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 0, 3 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 2
+            };     
+
+            var constraints = new List<LinearConstraint>() {lc1, lc2, lc3};
+
+            var goal = new Goal() 
+            { 
+                Coefficients = new double[2] { 6, 3 },
+                ConstantTerm = 0
+            };           
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Minimize
+            };
+            
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { .66667 , .33333 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 5
+            };
+            #endregion
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+
+        }
+
+        /// <summary>
+        ///A test for Solve
+        ///</summary>
+        [TestMethod()]
+        public void HW4No2()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[] { 1, 1, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 40
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[] { 2, 1, -1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 10
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[] { 0, -1, 1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 10
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[] { 2, 3, 1 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[] { 10, 10, 20 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 70
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+        /// <summary>
+        ///A test for Solve
+        ///</summary>
+        [TestMethod()]
+        public void RyansOnlineTest()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { -1, 2 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 36
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 6 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 132
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 3, 5 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 136
+            };
+
+            var lc4 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 5, 3 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 136
+            };
+
+            var lc5 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 6, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 132
+            };
+
+            var lc6 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 2, -1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 36
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3, lc4, lc5, lc6 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 10, 10 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Minimize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 17, 17 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 340
+            };
+            #endregion
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+        /// <summary>
+        ///A test for Solve
+        ///</summary>
+        [TestMethod()]
+        public void HW4No3()
+        {
+            #region Arrange
+            var target = new Solver();            
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[] { 1 , 1 , 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 40
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[] { 2 , 1 , -1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 10
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[] { 0 , -1 , 1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 10
+            };     
+
+            var constraints = new List<LinearConstraint>() {lc1, lc2, lc3};
+
+            var goal = new Goal() 
+            { 
+                Coefficients = new double[] { 2 , 3 , 1 },
+                ConstantTerm = 0
+            };           
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+            
+            var expected = new Solution()
+            {
+                Decisions = new double[] { 10 , 10 , 20 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 70
+            };
+            #endregion
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
         }
     }
 }

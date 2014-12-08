@@ -113,16 +113,11 @@ namespace RaikesSimplexService.Joel
                 //Z-Row
                 if (i == numConstraints)
                 {
-                    int ifMax = 1;
-                    if (standardModel.GoalKind == GoalKind.Maximize)
-                    {
-                        ifMax = -1;
-                    }
                     LHSArr[i, 0] = 1;
 
                     for (int j = 0; j < numCoefficients; j++)
                     {
-                        LHSArr[i, j + 1] = ifMax * standardModel.Goal.Coefficients[j];
+                        LHSArr[i, j + 1] = -1 * standardModel.Goal.Coefficients[j];
                     }
                     for (int j = 0; j < numSVars; j++)
                     {
@@ -159,17 +154,6 @@ namespace RaikesSimplexService.Joel
                                 LHSArr[i, j + numCoefficients + 1] = 0;
                         }
                     }
-                    /*for (int j = 0; j < numAVars; j++)
-                    {
-                        if (standardModel.ArtificialVars.ContainsKey(j))
-                        {
-                            if (i == j)
-                                LHSArr[i, actualNumAVars + numCoefficients + numSVars + 1] = standardModel.ArtificialVars[j];
-                            else
-                                LHSArr[i, actualNumAVars + numCoefficients + numSVars + 1] = 0;
-                            actualNumAVars++;
-                        }
-                    }*/
                 }
             }
             Matrix LHSMatrix = new Matrix(LHSArr);
